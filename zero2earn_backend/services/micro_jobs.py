@@ -1,74 +1,85 @@
-from __future__ import annotations
-
-MICRO_JOB_PORTALS = [
-    {
-        'id': 'clickworker',
-        'name': 'Clickworker',
-        'category': 'Microtasks',
-        'beginner': True,
-        'payout_speed': 'Medium',
-        'earning_range': '₹200-₹1,500/day',
-        'country_fit': 'Worldwide',
-        'url': 'https://www.clickworker.com/clickworker-job/',
-        'why': 'Quick-start platform for surveys, writing, categorization, and web research.',
-    },
-    {
-        'id': 'toloka',
-        'name': 'Toloka',
-        'category': 'AI data tasks',
-        'beginner': True,
-        'payout_speed': 'Fast',
-        'earning_range': '₹150-₹1,000/day',
-        'country_fit': 'Worldwide',
-        'url': 'https://toloka.ai/tolokers/',
-        'why': 'Useful for annotation, search relevance, and small AI evaluation tasks.',
-    },
-    {
-        'id': 'oneforma',
-        'name': 'OneForma',
-        'category': 'AI projects',
-        'beginner': False,
-        'payout_speed': 'Medium',
-        'earning_range': '₹300-₹3,000/day',
-        'country_fit': 'Worldwide',
-        'url': 'https://jobs.oneforma.com/',
-        'why': 'Better for language, annotation, and long-running AI data projects.',
-    },
-    {
-        'id': 'microworkers',
-        'name': 'Microworkers',
-        'category': 'Simple tasks',
-        'beginner': True,
-        'payout_speed': 'Medium',
-        'earning_range': '₹100-₹800/day',
-        'country_fit': 'Worldwide',
-        'url': 'https://www.microworkers.com/',
-        'why': 'Many small web, signup, testing, and categorization tasks.',
-    },
-    {
-        'id': 'appen',
-        'name': 'Appen CrowdGen',
-        'category': 'Crowd work / AI',
-        'beginner': False,
-        'payout_speed': 'Slow-Medium',
-        'earning_range': '₹300-₹2,500/day',
-        'country_fit': 'Varies by project',
-        'url': 'https://crowdgen.com/',
-        'why': 'Longer-term annotation and AI evaluation opportunities.',
-    },
-    {
-        'id': 'timebucks',
-        'name': 'TimeBucks',
-        'category': 'Quick cash',
-        'beginner': True,
-        'payout_speed': 'Fast',
-        'earning_range': '₹50-₹500/day',
-        'country_fit': 'Worldwide',
-        'url': 'https://timebucks.com/',
-        'why': 'Entry-level earning path while building profile elsewhere.',
-    },
-]
-
-
-def list_micro_jobs() -> list[dict]:
-    return MICRO_JOB_PORTALS
+def get_micro_jobs():
+    return {
+        "items": [
+            {
+                "name": "Remotasks",
+                "category": "AI Training",
+                "earning_range": "₹100 – ₹1000/day",
+                "payout_speed": "Weekly",
+                "url": "https://www.remotasks.com",
+                "why": "Simple AI tasks like labeling images and text."
+            },
+            {
+                "name": "Clickworker",
+                "category": "Microtasks",
+                "earning_range": "₹50 – ₹800/day",
+                "payout_speed": "Weekly",
+                "url": "https://www.clickworker.com",
+                "why": "Data entry, surveys, and short writing tasks."
+            },
+            {
+                "name": "Amazon MTurk",
+                "category": "Microtasks",
+                "earning_range": "₹100 – ₹1500/day",
+                "payout_speed": "Weekly",
+                "url": "https://www.mturk.com",
+                "why": "High volume micro tasks."
+            },
+            {
+                "name": "Appen",
+                "category": "AI Training",
+                "earning_range": "₹200 – ₹2000/day",
+                "payout_speed": "Monthly",
+                "url": "https://appen.com",
+                "why": "AI evaluation and training tasks."
+            },
+            {
+                "name": "Toloka",
+                "category": "AI Tasks",
+                "earning_range": "₹100 – ₹1200/day",
+                "payout_speed": "Fast",
+                "url": "https://toloka.ai",
+                "why": "Easy AI micro jobs."
+            },
+            {
+                "name": "Fiverr",
+                "category": "Freelance",
+                "earning_range": "₹500 – ₹5000/job",
+                "payout_speed": "Per gig",
+                "url": "https://fiverr.com",
+                "why": "Sell skills like writing, editing, design."
+            },
+            {
+                "name": "Upwork",
+                "category": "Freelance",
+                "earning_range": "₹1000 – ₹10000/job",
+                "payout_speed": "Weekly",
+                "url": "https://upwork.com",
+                "why": "High-paying freelance work."
+            },
+            {
+                "name": "Freelancer",
+                "category": "Freelance",
+                "earning_range": "₹500 – ₹5000/job",
+                "payout_speed": "Per project",
+                "url": "https://freelancer.com",
+                "why": "Entry-level freelance projects."
+            },
+            {
+                "name": "UserTesting",
+                "category": "Testing",
+                "earning_range": "₹500 – ₹2000/test",
+                "payout_speed": "Fast",
+                "url": "https://usertesting.com",
+                "why": "Get paid to test apps/websites."
+            },
+            {
+                "name": "TimeBucks",
+                "category": "Tasks",
+                "earning_range": "₹50 – ₹500/day",
+                "payout_speed": "Weekly",
+                "url": "https://timebucks.com",
+                "why": "Small tasks like watching videos, surveys."
+            }
+        ]
+    }

@@ -4,7 +4,6 @@ import sqlite3
 from datetime import datetime
 
 router = APIRouter(prefix="/api/admin", tags=["admin"])
-
 DB_PATH = Path(__file__).resolve().parents[2] / "zero2earn.db"
 
 
@@ -26,6 +25,7 @@ def ensure_tables():
         organization TEXT NOT NULL,
         lead_type TEXT DEFAULT 'partner',
         message TEXT DEFAULT '',
+        status TEXT DEFAULT 'new',
         created_at TEXT NOT NULL
     )
     """)
@@ -46,27 +46,43 @@ def admin_stats():
         except Exception:
             return 0
 
-    users = count("users")
-    applications = count("applications")
-    income = 0
+    def sum_payments():
+        try:
+            row = cur.execute("SELECT COALESCE(SUM(amount),0) FROM payments WHERE status='paid'").fetchone()
+            return int((row[0] or 0) / 100)
+        except Exception:
+            return 0
+
+    total_users = count("users")
+    total_applications = count("applications")
+    partner_leads = count("partner_leads")
+    revenue = sum_payments()
 
     try:
-        row = cur.execute("SELECT COALESCE(SUM(amount),0) FROM income").fetchone()
-        income = row[0] or 0
+        pro_users = cur.execute("SELECT COUNT(*) FROM users WHERE plan='pro'").fetchone()[0]
+    except Exception:
+        pro_users = 0
+
+    try:
+        income = cur.execute("SELECT COALESCE(SUM(amount),0) FROM income").fetchone()[0] or 0
     except Exception:
         income = 0
 
-    leads = count("partner_leads")
+    conversion = round((pro_users / total_users) * 100, 1) if total_users else 0
 
     conn.close()
 
     return {
-        "total_users": users,
-        "total_applications": applications,
+        "total_users": total_users,
+        "pro_users": pro_users,
+        "free_users": max(total_users - pro_users, 0),
+        "total_applications": total_applications,
         "total_income": income,
-        "partner_leads": leads,
-        "pro_users": 0,
-        "monthly_revenue": 0
+        "partner_leads": partner_leads,
+        "monthly_revenue": revenue,
+        "mrr": revenue,
+        "arpu": round(revenue / total_users, 1) if total_users else 0,
+        "conversion_rate": conversion
     }
 
 
@@ -80,20 +96,12 @@ def create_lead(
 ):
     ensure_tables()
     conn = db()
-    cur = conn.cursor()
 
-    cur.execute("""
+    conn.execute("""
     INSERT INTO partner_leads
-    (name, email, organization, lead_type, message, created_at)
-    VALUES (?, ?, ?, ?, ?, ?)
-    """, (
-        name,
-        email,
-        organization,
-        lead_type,
-        message,
-        datetime.now().isoformat()
-    ))
+    (name, email, organization, lead_type, message, status, created_at)
+    VALUES (?, ?, ?, ?, ?, 'new', ?)
+    """, (name, email, organization, lead_type, message, datetime.now().isoformat(timespec="seconds")))
 
     conn.commit()
     conn.close()
@@ -105,15 +113,9 @@ def create_lead(
 def list_leads():
     ensure_tables()
     conn = db()
-    rows = conn.execute("""
-        SELECT * FROM partner_leads
-        ORDER BY id DESC
-    """).fetchall()
+    rows = conn.execute("SELECT * FROM partner_leads ORDER BY id DESC").fetchall()
     conn.close()
-
-    return {
-        "items": [dict(r) for r in rows]
-    }
+    return {"items": [dict(r) for r in rows]}
 
 
 @router.get("/users")
@@ -121,7 +123,7 @@ def list_users():
     conn = db()
     try:
         rows = conn.execute("""
-            SELECT id, name, email, headline, track, stage, goal_daily
+            SELECT id, name, email, headline, track, stage, goal_daily, plan, pro_until
             FROM users
             ORDER BY id DESC
         """).fetchall()
@@ -129,5 +131,21 @@ def list_users():
     except Exception:
         users = []
     conn.close()
-
     return {"items": users}
+
+
+@router.get("/payments")
+def list_payments():
+    conn = db()
+    try:
+        rows = conn.execute("""
+            SELECT * FROM payments
+            ORDER BY id DESC
+        """).fetchall()
+        items = [dict(r) for r in rows]
+        for item in items:
+            item["amount_rupees"] = int((item.get("amount") or 0) / 100)
+    except Exception:
+        items = []
+    conn.close()
+    return {"items": items}

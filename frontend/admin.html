@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <title>Zero2Earn Admin</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="./styles.css">
 </head>
 <body>
 
@@ -20,6 +20,7 @@
 
     <div class="nav">
       <button onclick="loadAdmin()" class="active">Dashboard</button>
+      <button onclick="loadRevenue()">Revenue</button>
       <button onclick="loadLeads()">Partner Leads</button>
       <button onclick="loadUsers()">Users</button>
       <button onclick="window.location.href='app.html'">User App</button>
@@ -28,8 +29,8 @@
 
     <div class="sidebar-panel">
       <b>Founder View</b>
-      <p class="small muted">Track users, leads, revenue, and growth.</p>
-      <span class="badge gold">Admin MVP</span>
+      <p class="small muted">Track users, payments, leads and growth.</p>
+      <span class="badge gold">Revenue Live</span>
     </div>
   </aside>
 
@@ -48,12 +49,12 @@
 
     <div id="content"></div>
 
-    <footer>Zero2Earn Admin � users, leads, revenue, and institutional growth.</footer>
+    <footer>Zero2Earn Admin — users, payments, revenue, leads and growth.</footer>
   </main>
 </div>
 
 <script>
-const API = "http://127.0.0.1:8000";
+const API = "https://zero2earn.onrender.com";
 
 function setContent(html){
   document.getElementById("content").innerHTML = html;
@@ -65,8 +66,8 @@ async function getJSON(path){
 }
 
 async function loadAdmin(){
-  document.getElementById("pageTitle").innerText = "Admin Dashboard";
-  document.getElementById("pageSub").innerText = "Business command center";
+  document.getElementById("pageTitle").innerText = "Revenue Intelligence";
+  document.getElementById("pageSub").innerText = "Founder business command center";
 
   const d = await getJSON("/api/admin/stats");
 
@@ -74,45 +75,68 @@ async function loadAdmin(){
     <section class="card hero">
       <div class="hero-content">
         <h2>Zero2Earn Growth Cockpit</h2>
-        <p>Monitor users, applications, income, leads, and future SaaS revenue.</p>
+        <p>Monitor users, Pro conversion, payments, applications and partner pipeline.</p>
         <span class="badge">Founder dashboard</span>
         <span class="badge blue">SaaS metrics</span>
-        <span class="badge gold">Partner pipeline</span>
+        <span class="badge gold">Revenue live</span>
       </div>
     </section>
 
     <div class="grid">
       <div class="metric"><h2>${d.total_users}</h2><p>Total users</p></div>
-      <div class="metric"><h2>${d.total_applications}</h2><p>Applications</p></div>
-      <div class="metric"><h2>Rs.${d.total_income}</h2><p>User income tracked</p></div>
-      <div class="metric"><h2>${d.partner_leads}</h2><p>Partner leads</p></div>
       <div class="metric"><h2>${d.pro_users}</h2><p>Pro users</p></div>
-      <div class="metric"><h2>Rs.${d.monthly_revenue}</h2><p>Monthly revenue</p></div>
-      <div class="grid">
-  <div class="metric">
-    <h2>Rs.${d.monthly_revenue}</h2>
-    <p>MRR</p>
-  </div>
-
-  <div class="metric">
-    <h2>${d.total_users > 0 ? Math.round(d.monthly_revenue / d.total_users) : 0}</h2>
-    <p>ARPU</p>
-  </div>
-
-  <div class="metric">
-    <h2>0%</h2>
-    <p>Free → Pro Conversion</p>
-  </div>
-</div>
+      <div class="metric"><h2>Rs.${d.mrr}</h2><p>MRR</p></div>
+      <div class="metric"><h2>Rs.${d.arpu}</h2><p>ARPU</p></div>
+      <div class="metric"><h2>${d.conversion_rate}%</h2><p>Free → Pro</p></div>
+      <div class="metric"><h2>${d.partner_leads}</h2><p>Partner leads</p></div>
+    </div>
 
     <div class="card">
-      <h2>Next Founder Actions</h2>
-      <div class="item">1. Collect college/company leads from Partners page.</div>
-      <div class="item">2. Convert early users into Pro plan after public launch.</div>
-      <div class="item">3. Improve job matching to increase application success.</div>
-      <div class="item">4. Add Razorpay after website + app deployment.</div>
+      <h2>Founder Actions</h2>
+      <div class="item">1. Push 50 beta users through Resume First.</div>
+      <div class="item">2. Convert serious users to Pro at Rs.499/month.</div>
+      <div class="item">3. Contact colleges and companies from Partner Leads.</div>
+      <div class="item">4. Improve jobs matching based on resume keywords.</div>
     </div>
   `);
+}
+
+async function loadRevenue(){
+  document.getElementById("pageTitle").innerText = "Revenue";
+  document.getElementById("pageSub").innerText = "Payments and Pro unlocks";
+
+  const d = await getJSON("/api/admin/payments");
+
+  let html = `
+    <section class="card hero">
+      <div class="hero-content">
+        <h2>Payment Ledger</h2>
+        <p>Track Razorpay orders, paid users and revenue movement.</p>
+      </div>
+    </section>
+
+    <div class="card">
+      <h2>Payments</h2>
+  `;
+
+  if(!d.items || d.items.length === 0){
+    html += `<p class="muted">No payments yet.</p>`;
+  } else {
+    d.items.forEach(p => {
+      html += `
+        <div class="item">
+          <h3>Rs.${p.amount_rupees}</h3>
+          <span class="badge">${p.status}</span>
+          <span class="badge blue">User ${p.user_id}</span>
+          <p class="muted">${p.razorpay_order_id || ""}</p>
+          <p class="muted">${p.razorpay_payment_id || ""}</p>
+        </div>
+      `;
+    });
+  }
+
+  html += `</div>`;
+  setContent(html);
 }
 
 async function loadLeads(){
@@ -125,18 +149,9 @@ async function loadLeads(){
     <section class="card hero">
       <div class="hero-content">
         <h2>Partner Lead Pipeline</h2>
-        <p>Colleges, companies, and training partners who showed interest.</p>
+        <p>Colleges, companies and training partners who showed interest.</p>
       </div>
     </section>
-
-    <div class="card">
-      <h2>Add Lead Manually</h2>
-      <input id="leadName" placeholder="Name">
-      <input id="leadEmail" placeholder="Email">
-      <input id="leadOrg" placeholder="College / Company">
-      <input id="leadType" placeholder="college/company/partner">
-      <button onclick="saveLead()">Save Lead</button>
-    </div>
 
     <div class="card">
       <h2>Leads</h2>
@@ -160,22 +175,6 @@ async function loadLeads(){
 
   html += `</div>`;
   setContent(html);
-}
-
-async function saveLead(){
-  const form = new URLSearchParams();
-  form.append("name", document.getElementById("leadName").value);
-  form.append("email", document.getElementById("leadEmail").value);
-  form.append("organization", document.getElementById("leadOrg").value);
-  form.append("lead_type", document.getElementById("leadType").value || "partner");
-
-  await fetch(API + "/api/admin/leads", {
-    method:"POST",
-    headers:{"Content-Type":"application/x-www-form-urlencoded"},
-    body:form
-  });
-
-  loadLeads();
 }
 
 async function loadUsers(){
@@ -206,7 +205,7 @@ async function loadUsers(){
           <p>${u.email || ""}</p>
           <span class="badge">ID: ${u.id}</span>
           <span class="badge blue">${u.track || "No track"}</span>
-          <span class="badge gold">Goal Rs.${u.goal_daily || 0}</span>
+          <span class="badge gold">${u.plan || "free"}</span>
         </div>
       `;
     });

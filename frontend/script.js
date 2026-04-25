@@ -1,9 +1,9 @@
 const API = "https://zero2earn.onrender.com";
 
 let userId = localStorage.getItem("z2e_user_id") || null;
+let currentUser = null;
 let currentPage = "home";
 let latestResume = null;
-let currentUser = null;
 let isPro = localStorage.getItem("z2e_pro") === "yes";
 
 function setContent(html) {
@@ -16,7 +16,9 @@ function safeArr(x) {
 
 async function apiGet(path) {
   const res = await fetch(API + path);
-  return await res.json();
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.detail || "API error");
+  return data;
 }
 
 function updateAuthUI() {
@@ -26,10 +28,8 @@ function updateAuthUI() {
   if (userId) {
     loginBox.classList.add("hidden");
     userBox.classList.remove("hidden");
-    document.getElementById("userMini").innerText =
-      currentUser?.name || "User ID: " + userId;
-    document.getElementById("proMini").innerText =
-      isPro ? "Pro plan active" : "Free plan";
+    document.getElementById("userMini").innerText = currentUser?.name || "User ID: " + userId;
+    document.getElementById("proMini").innerText = isPro ? "Pro plan active" : "Free plan";
   } else {
     loginBox.classList.remove("hidden");
     userBox.classList.add("hidden");
@@ -37,33 +37,40 @@ function updateAuthUI() {
 }
 
 async function login() {
-  const form = new URLSearchParams();
-  form.append("email", document.getElementById("emailInput").value.trim());
-  form.append("password", document.getElementById("passwordInput").value.trim());
+  try {
+    const form = new URLSearchParams();
+    form.append("email", document.getElementById("emailInput").value.trim());
+    form.append("password", document.getElementById("passwordInput").value.trim());
 
-  const res = await fetch(API + "/api/login", {
-    method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body: form
-  });
+    const res = await fetch(API + "/api/login", {
+      method: "POST",
+      headers: {"Content-Type": "application/x-www-form-urlencoded"},
+      body: form
+    });
 
-  const data = await res.json();
+    const data = await res.json();
 
-  if (data.user_id) {
+    if (!res.ok || !data.user_id) {
+      document.getElementById("status").innerText = data.detail || "Login failed";
+      return;
+    }
+
     userId = data.user_id;
     localStorage.setItem("z2e_user_id", userId);
     await loadCurrentUser();
     updateAuthUI();
     showPage("home");
-  } else {
-    document.getElementById("status").innerText = "Login failed";
+  } catch (e) {
+    document.getElementById("status").innerText = e.message;
   }
 }
 
 function logout() {
   localStorage.removeItem("z2e_user_id");
+  localStorage.removeItem("z2e_pro");
   userId = null;
   currentUser = null;
+  isPro = false;
   updateAuthUI();
   renderWelcome();
 }
@@ -72,6 +79,8 @@ async function loadCurrentUser() {
   if (!userId) return;
   const d = await apiGet("/api/dashboard/" + userId);
   currentUser = d.user;
+  isPro = currentUser.plan === "pro" || localStorage.getItem("z2e_pro") === "yes";
+  if (isPro) localStorage.setItem("z2e_pro", "yes");
 }
 
 function setActive(page) {
@@ -89,13 +98,13 @@ function showPage(page) {
   setActive(page);
 
   const titles = {
-    home: ["Home", "Your premium earning command center"],
+    home: ["Home", "Your earning command center"],
     resume: ["Resume First", "AI resume intelligence and premium rewrite"],
-    jobs: ["Jobs", "High-intent job opportunities with AI proposals"],
-    micro: ["Micro Jobs", "Fast earning path for first-income momentum"],
-    automation: ["Automation", "Daily apply engine, queue health, follow-ups, and forecasts"],
+    jobs: ["Jobs", "High-intent opportunities with AI proposals"],
+    micro: ["Micro Jobs", "Fast backup income path"],
+    automation: ["Automation", "Daily apply engine and forecasts"],
     partners: ["Partners", "College and company revenue system"],
-    pricing: ["Plans", "Subscriptions, institutions, and hiring revenue"]
+    pricing: ["Plans", "Upgrade to Pro and unlock revenue flow"]
   };
 
   document.getElementById("pageTitle").innerText = titles[page][0];
@@ -119,12 +128,12 @@ function renderWelcome() {
   setContent(`
     <section class="card hero">
       <div class="hero-content">
-        <h2>From zero confusion to daily earning command.</h2>
-        <p>Login to access your resume engine, jobs, micro-income path, automation, and progress tracker.</p>
+        <h2>From job search confusion to daily earning command.</h2>
+        <p>Login to unlock resume scoring, job matching, micro-income paths, automation and Pro tools.</p>
         <span class="badge">Resume Intelligence</span>
         <span class="badge blue">Live Jobs</span>
-        <span class="badge gold">Micro Income</span>
-        <span class="badge purple">College + Company SaaS</span>
+        <span class="badge gold">Payments Live</span>
+        <span class="badge purple">SaaS Ready</span>
       </div>
     </section>
   `);
@@ -132,70 +141,70 @@ function renderWelcome() {
 
 function progressBar(value) {
   const safeValue = Math.max(0, Math.min(100, value || 0));
-  return `
-    <div class="progress">
-      <div class="progress-inner" style="width:${safeValue}%"></div>
-    </div>
-  `;
+  return `<div class="progress"><div class="progress-inner" style="width:${safeValue}%"></div></div>`;
 }
 
 async function loadHome() {
-  const d = await apiGet("/api/dashboard/" + userId);
-  currentUser = d.user;
-  updateAuthUI();
+  try {
+    const d = await apiGet("/api/dashboard/" + userId);
+    currentUser = d.user;
+    updateAuthUI();
 
-  const earned = d.metrics.total_earned || 0;
-  const goal = d.user.goal_daily || 500;
-  const remaining = Math.max(goal - earned, 0);
-  const progress = Math.min(100, Math.floor((earned / goal) * 100));
+    const earned = d.metrics.total_earned || 0;
+    const goal = d.user.goal_daily || 500;
+    const remaining = Math.max(goal - earned, 0);
+    const progress = Math.min(100, Math.floor((earned / goal) * 100));
 
-  setContent(`
-    <section class="card hero">
-      <div class="hero-content">
-        <h2>${d.user.name}, Rs.${remaining} away from today’s goal.</h2>
-        <p>${d.user.headline || "Complete Resume First to unlock stronger recommendations."}</p>
-        ${progressBar(progress)}
-        <span class="badge">${d.user.track}</span>
-        <span class="badge blue">Stage: ${d.user.stage}</span>
-        <span class="badge gold">Goal: Rs.${goal}/day</span>
-        <span class="badge purple">${isPro ? "Pro unlocked" : "Free plan"}</span>
-      </div>
-    </section>
-
-    <div class="grid">
-      <div class="metric"><h2>Rs.${earned}</h2><p>Total earned</p></div>
-      <div class="metric"><h2>${d.metrics.jobs_applied}</h2><p>Applications</p></div>
-      <div class="metric"><h2>${d.metrics.replies}</h2><p>Replies</p></div>
-      <div class="metric"><h2>${d.metrics.interviews}</h2><p>Interviews</p></div>
-    </div>
-
-    <div class="card">
-      <h2>Today’s Money Actions</h2>
-      ${d.tasks.map(t => `
-        <div class="item">
-          <h3>${t.title}</h3>
-          <p class="muted">${t.description}</p>
-          <span class="badge gold">Reward: Rs.${t.estimated_reward}</span>
-          <span class="badge blue">${t.status}</span>
-          <br><br>
-          <button onclick="completeTask(${t.id})">Complete & Unlock Reward</button>
+    setContent(`
+      <section class="card hero">
+        <div class="hero-content">
+          <h2>${d.user.name}, Rs.${remaining} away from today's goal.</h2>
+          <p>${d.user.headline || "Complete Resume First to unlock stronger recommendations."}</p>
+          ${progressBar(progress)}
+          <span class="badge">${d.user.track}</span>
+          <span class="badge blue">Stage: ${d.user.stage}</span>
+          <span class="badge gold">Goal: Rs.${goal}/day</span>
+          <span class="badge purple">${isPro ? "Pro unlocked" : "Free plan"}</span>
         </div>
-      `).join("")}
-    </div>
+      </section>
 
-    <div class="card hero">
-      <div class="hero-content">
-        <h2>Your Money Path</h2>
-        <p>Rs.0 → Rs.500 → Rs.1,000 → Rs.5,000 → Rs.10,000</p>
-        <button onclick="showPage('jobs')">Open Jobs</button>
-        <button class="secondary" onclick="showPage('micro')">Start Micro Income</button>
+      <div class="grid">
+        <div class="metric"><h2>Rs.${earned}</h2><p>Total earned</p></div>
+        <div class="metric"><h2>${d.metrics.jobs_applied}</h2><p>Applications</p></div>
+        <div class="metric"><h2>${d.metrics.replies}</h2><p>Replies</p></div>
+        <div class="metric"><h2>${d.metrics.interviews}</h2><p>Interviews</p></div>
       </div>
-    </section>
-  `);
+
+      <div class="card">
+        <h2>Today's Money Actions</h2>
+        ${d.tasks.map(t => `
+          <div class="item">
+            <h3>${t.title}</h3>
+            <p class="muted">${t.description}</p>
+            <span class="badge gold">Reward: Rs.${t.estimated_reward}</span>
+            <span class="badge blue">${t.status}</span>
+            <br><br>
+            <button onclick="completeTask(${t.id})">Complete & Unlock Reward</button>
+          </div>
+        `).join("")}
+      </div>
+
+      <div class="card hero">
+        <div class="hero-content">
+          <h2>Your Money Path</h2>
+          <p>Rs.0 → Rs.500 → Rs.1,000 → Rs.5,000 → Rs.10,000</p>
+          <button onclick="showPage('jobs')">Open Jobs</button>
+          <button class="secondary" onclick="showPage('micro')">Start Micro Income</button>
+        </div>
+      </div>
+    `);
+  } catch (e) {
+    setContent(`<div class="card"><h2>Error loading dashboard</h2><p>${e.message}</p></div>`);
+  }
 }
 
 async function completeTask(id) {
-  await fetch(API + "/api/tasks/" + id + "/complete", { method: "POST" });
+  await fetch(API + "/api/tasks/" + id + "/complete", {method: "POST"});
   loadHome();
 }
 
@@ -204,7 +213,7 @@ function loadResume() {
     <section class="card hero">
       <div class="hero-content">
         <h2>Resume Intelligence Engine</h2>
-        <p>Upload resume, extract skills, score profile, find missing keywords, generate premium rewrite, and download resume text.</p>
+        <p>Upload resume, extract skills, score profile, find missing keywords and generate better positioning.</p>
         <span class="badge">ATS scoring</span>
         <span class="badge blue">Skill tags</span>
         <span class="badge red">Missing keywords</span>
@@ -233,18 +242,14 @@ async function uploadResume() {
   const form = new FormData();
   form.append("file", file);
 
-  const res = await fetch(API + "/api/resume/upload/" + userId, {
-    method: "POST",
-    body: form
-  });
-
+  const res = await fetch(API + "/api/resume/upload/" + userId, {method: "POST", body: form});
   const d = await res.json();
   latestResume = d;
   renderResumeUI(d);
 }
 
 async function optimizeResume() {
-  const res = await fetch(API + "/api/resume/optimize/" + userId, { method: "POST" });
+  const res = await fetch(API + "/api/resume/optimize/" + userId, {method: "POST"});
   const d = await res.json();
   latestResume = d;
   renderResumeUI(d);
@@ -275,26 +280,10 @@ function renderResumeUI(d) {
     </div>
 
     <div class="card"><h2>Optimized Summary</h2><p>${d.optimized_summary || d.summary || ""}</p></div>
-
-    <div class="card">
-      <h2>Skills</h2>
-      ${safeArr(d.skills).map(s => `<span class="badge">${s}</span>`).join("")}
-    </div>
-
-    <div class="card">
-      <h2>Missing Keywords</h2>
-      ${safeArr(d.missing_keywords).map(k => `<span class="badge red">${k}</span>`).join("")}
-    </div>
-
-    <div class="card">
-      <h2>ATS Keywords</h2>
-      ${safeArr(d.ats_keywords).map(k => `<span class="badge blue">${k}</span>`).join("")}
-    </div>
-
-    <div class="card">
-      <h2>Resume Bullets</h2>
-      ${safeArr(d.recommended_bullets).map(b => `<div class="item">${b}</div>`).join("")}
-    </div>
+    <div class="card"><h2>Skills</h2>${safeArr(d.skills).map(s => `<span class="badge">${s}</span>`).join("")}</div>
+    <div class="card"><h2>Missing Keywords</h2>${safeArr(d.missing_keywords).map(k => `<span class="badge red">${k}</span>`).join("")}</div>
+    <div class="card"><h2>ATS Keywords</h2>${safeArr(d.ats_keywords).map(k => `<span class="badge blue">${k}</span>`).join("")}</div>
+    <div class="card"><h2>Resume Bullets</h2>${safeArr(d.recommended_bullets).map(b => `<div class="item">${b}</div>`).join("")}</div>
   `;
 }
 
@@ -310,9 +299,8 @@ async function loadJobs() {
         <span class="badge blue">AI proposals enabled</span>
       </div>
     </section>
+    <div class="card">
   `;
-
-  html += `<div class="card">`;
 
   if (!d.jobs || d.jobs.length === 0) {
     html += `<p>No jobs found.</p>`;
@@ -405,7 +393,7 @@ async function loadMicro() {
 async function loadAutomation() {
   const auto = await apiGet("/api/automation/" + userId + "?limit=20&min_score=20");
 
-  let followups = { items: [] };
+  let followups = {items: []};
   try {
     followups = await apiGet("/api/automation/followups/" + userId);
   } catch (e) {}
@@ -414,7 +402,7 @@ async function loadAutomation() {
     <section class="card hero">
       <div class="hero-content">
         <h2>Automation Command Center</h2>
-        <p>Prepare, submit, track, follow up, forecast, and improve.</p>
+        <p>Prepare, submit, track, follow up, forecast and improve.</p>
         <span class="badge">${auto.mode}</span>
         <span class="badge blue">Min score: ${auto.min_score}</span>
         <span class="badge gold">Queue target: ${auto.recommended_queue_size}</span>
@@ -423,10 +411,10 @@ async function loadAutomation() {
 
     <div class="command-grid">
       <div class="card">
-        <h2>Today’s Mission</h2>
+        <h2>Today's Mission</h2>
         <div class="timeline">
           <div class="step"><h3>1. Prepare application queue</h3><p>Build a ready-to-submit queue.</p></div>
-          <div class="step"><h3>2. Submit today’s applications</h3><p>Submit 5 prepared applications.</p></div>
+          <div class="step"><h3>2. Submit applications</h3><p>Submit 5 prepared applications.</p></div>
           <div class="step"><h3>3. Follow up</h3><p>Due follow-ups: ${safeArr(followups.items).length}</p></div>
           <div class="step"><h3>4. Backup income</h3><p>Complete one microjob or skill-gap task.</p></div>
         </div>
@@ -456,7 +444,7 @@ async function prepareQueue() {
 
   const res = await fetch(API + "/api/automation/queue/" + userId, {
     method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    headers: {"Content-Type": "application/x-www-form-urlencoded"},
     body: form
   });
 
@@ -470,7 +458,7 @@ function loadPartners() {
     <section class="card hero">
       <div class="hero-content">
         <h2>Partnership Engine</h2>
-        <p>Built for colleges, companies, training partners, and placement programs.</p>
+        <p>Built for colleges, companies, training partners and placement programs.</p>
       </div>
     </section>
 
@@ -479,48 +467,84 @@ function loadPartners() {
       <div class="card"><h2>Company Hiring</h2><p>Featured jobs and candidate pipeline.</p></div>
       <div class="card"><h2>Training Partners</h2><p>Upskill users and monetize skill-gap tasks.</p></div>
     </div>
-  `);
-}
 
-function loadPricing() {
-  <button onclick="buyPro()">Pay Rs.499 and Unlock Pro</button>
-  setContent(`
-    <section class="card hero">
-      <div class="hero-content">
-        <h2>Zero2Earn Revenue System</h2>
-        <p>Subscriptions, institutions, company hiring, and featured jobs.</p>
-      </div>
-    </section>
-
-    <div class="grid">
-      <div class="card"><h2>Free</h2><h2>Rs.0</h2><p>Basic jobs and microjobs.</p></div>
-      <div class="card"><h2>Pro</h2><h2>Rs.499/month</h2><p>AI proposals, automation, premium resume rewrite.</p><button onclick="isPro=true;localStorage.setItem('z2e_pro','yes');updateAuthUI();alert('Demo Pro unlocked')">Unlock Demo Pro</button></div>
-      <div class="card"><h2>College</h2><h2>Custom</h2><p>Bulk student dashboard.</p></div>
-      <div class="card"><h2>Company</h2><h2>Custom</h2><p>Hiring dashboard and featured jobs.</p></div>
+    <div class="card">
+      <h2>Partner Lead Capture</h2>
+      <input id="leadName" placeholder="Name">
+      <input id="leadEmail" placeholder="Email">
+      <input id="leadOrg" placeholder="College / Company">
+      <input id="leadType" placeholder="college/company/partner">
+      <button onclick="saveLead()">Submit Interest</button>
     </div>
   `);
 }
 
-updateAuthUI();
+async function saveLead() {
+  const form = new URLSearchParams();
+  form.append("name", document.getElementById("leadName").value);
+  form.append("email", document.getElementById("leadEmail").value);
+  form.append("organization", document.getElementById("leadOrg").value);
+  form.append("lead_type", document.getElementById("leadType").value || "partner");
 
-if (userId) {
-  loadCurrentUser().then(() => {
-    updateAuthUI();
-    showPage("home");
+  await fetch(API + "/api/admin/leads", {
+    method: "POST",
+    headers: {"Content-Type": "application/x-www-form-urlencoded"},
+    body: form
   });
-} else {
-  renderWelcome();
+
+  alert("Lead saved.");
 }
+
+function loadPricing() {
+  setContent(`
+    <section class="card hero">
+      <div class="hero-content">
+        <h2>Zero2Earn Revenue System</h2>
+        <p>Upgrade to Pro and unlock automation, AI proposals and premium earning tools.</p>
+      </div>
+    </section>
+
+    <div class="grid">
+      <div class="card">
+        <h2>Free</h2>
+        <h2>Rs.0</h2>
+        <p>Basic jobs, microjobs and dashboard.</p>
+      </div>
+
+      <div class="card featured">
+        <h2>Pro</h2>
+        <h2>Rs.499/month</h2>
+        <p>AI proposals, automation, premium resume rewrite and high-score job workflow.</p>
+        <button onclick="buyPro()">Pay Rs.499 and Unlock Pro</button>
+      </div>
+
+      <div class="card">
+        <h2>College</h2>
+        <h2>Custom</h2>
+        <p>Bulk student dashboard and placement reports.</p>
+      </div>
+
+      <div class="card">
+        <h2>Company</h2>
+        <h2>Custom</h2>
+        <p>Hiring dashboard, featured jobs and candidate pipeline.</p>
+      </div>
+    </div>
+  `);
+}
+
 async function buyPro() {
   if (!userId) {
     alert("Please login first.");
     return;
   }
 
-  const res = await fetch(`${API}/api/payments/create-order/${userId}`, {
-    method: "POST"
-  });
+  if (typeof Razorpay === "undefined") {
+    alert("Razorpay checkout script not loaded.");
+    return;
+  }
 
+  const res = await fetch(`${API}/api/payments/create-order/${userId}`, {method: "POST"});
   const data = await res.json();
 
   if (!res.ok) {
@@ -545,18 +569,35 @@ async function buyPro() {
       const result = await verify.json();
 
       if (verify.ok) {
+        isPro = true;
         localStorage.setItem("z2e_pro", "yes");
         alert("Pro activated successfully.");
-        location.reload();
+        await loadCurrentUser();
+        updateAuthUI();
+        showPage("home");
       } else {
         alert(result.detail || "Payment verification failed");
       }
     },
-    theme: {
-      color: "#059669"
-    }
+    theme: {color: "#059669"}
   };
 
   const rzp = new Razorpay(options);
   rzp.open();
+}
+
+updateAuthUI();
+
+if (userId) {
+  loadCurrentUser().then(() => {
+    updateAuthUI();
+    showPage("home");
+  }).catch(() => {
+    localStorage.clear();
+    userId = null;
+    updateAuthUI();
+    renderWelcome();
+  });
+} else {
+  renderWelcome();
 }

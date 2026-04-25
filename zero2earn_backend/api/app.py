@@ -15,7 +15,7 @@ except Exception:
 
 from . import admin
 
-app = FastAPI(title="Zero2Earn AI SaaS", version="2.1.0")
+app = FastAPI(title="Zero2Earn AI SaaS", version="2.2.0")
 app.include_router(admin.router)
 
 app.add_middleware(
@@ -139,7 +139,6 @@ def init_db():
     )
     """)
 
-    # Safe migrations for old DB files
     for col, definition in {
         "skills": "TEXT DEFAULT ''",
         "resume_text": "TEXT DEFAULT ''",
@@ -246,7 +245,8 @@ def extract_resume_text(raw: str):
         "Medical Writing", "Clinical Research", "Healthcare Consulting",
         "Telemedicine", "Research", "Documentation", "AI Tools",
         "Patient Education", "Clinical Operations", "Content Writing",
-        "Data Analysis"
+        "Data Analysis", "Insurance Verification", "Claims Review",
+        "Medical Coding", "Patient Support"
     ]:
         if kw.lower() in lowered:
             skills.append(kw)
@@ -257,7 +257,7 @@ def extract_resume_text(raw: str):
     track = "Medical writing + AI + consulting"
 
     missing = []
-    for kw in ["Portfolio", "LinkedIn", "Writing Samples"]:
+    for kw in ["Portfolio", "LinkedIn", "Writing Samples", "Proposal Samples"]:
         if kw.lower() not in lowered:
             missing.append(kw)
 
@@ -265,7 +265,7 @@ def extract_resume_text(raw: str):
     summary = (
         f"Profile focus: {track}. Key strengths: {', '.join(skills[:5])}. "
         "This profile is positioned for remote healthcare, research, content, "
-        "documentation, and AI-assisted consulting opportunities."
+        "documentation, insurance, and AI-assisted consulting opportunities."
     )
 
     return {
@@ -286,9 +286,10 @@ def extract_resume_text(raw: str):
         "ats_keywords": skills + missing,
         "job_search_focus": [
             "medical writer",
-            "research assistant",
+            "clinical research assistant",
             "documentation specialist",
-            "healthcare consultant"
+            "healthcare consultant",
+            "insurance verification specialist"
         ]
     }
 
@@ -296,21 +297,23 @@ def extract_resume_text(raw: str):
 LIVE_JOBS = [
     {
         "id": "medical-writer-001",
-        "title": "Medical Content Writer",
-        "company": "Remote Healthcare Studio",
+        "title": "AI Medical Writer",
+        "company": "HealthTech AI",
         "location": "Remote",
         "source": "Zero2Earn curated",
         "apply_url": "https://www.linkedin.com/jobs/search/?keywords=medical%20writer%20remote",
-        "keywords": "medical writing healthcare clinical research documentation content"
+        "keywords": "medical writing healthcare clinical research documentation content ai",
+        "description": "Create healthcare and AI-assisted medical content, patient education material, and clinical documentation."
     },
     {
         "id": "clinical-research-002",
         "title": "Clinical Research Assistant",
-        "company": "Health Research Network",
+        "company": "Global Trials Network",
         "location": "Remote",
         "source": "Zero2Earn curated",
         "apply_url": "https://www.indeed.com/jobs?q=clinical+research+assistant+remote",
-        "keywords": "clinical research healthcare documentation data patient"
+        "keywords": "clinical research healthcare documentation data patient protocol",
+        "description": "Support clinical research documentation, protocol review, and patient data tracking."
     },
     {
         "id": "insurance-verification-003",
@@ -319,7 +322,8 @@ LIVE_JOBS = [
         "location": "Remote",
         "source": "Zero2Earn curated",
         "apply_url": "https://www.indeed.com/jobs?q=insurance+verification+remote",
-        "keywords": "healthcare insurance verification documentation claims"
+        "keywords": "healthcare insurance verification documentation claims patient eligibility benefits",
+        "description": "Verify insurance eligibility, document benefits, and support healthcare operations."
     },
     {
         "id": "patient-education-004",
@@ -328,7 +332,68 @@ LIVE_JOBS = [
         "location": "Remote",
         "source": "Zero2Earn curated",
         "apply_url": "https://www.linkedin.com/jobs/search/?keywords=patient%20education%20content%20remote",
-        "keywords": "patient education medical writing healthcare content"
+        "keywords": "patient education medical writing healthcare content communication",
+        "description": "Create patient education articles, guides, and simplified healthcare content."
+    },
+    {
+        "id": "telemedicine-005",
+        "title": "Telemedicine Support Consultant",
+        "company": "Remote Clinic Network",
+        "location": "Remote",
+        "source": "Zero2Earn curated",
+        "apply_url": "https://www.linkedin.com/jobs/search/?keywords=telemedicine%20consultant%20remote",
+        "keywords": "telemedicine healthcare patient support medical consultation documentation",
+        "description": "Support telemedicine workflows, patient communication, and clinical documentation."
+    },
+    {
+        "id": "medical-claims-006",
+        "title": "Medical Claims Reviewer",
+        "company": "Claims Review Hub",
+        "location": "Remote",
+        "source": "Zero2Earn curated",
+        "apply_url": "https://www.indeed.com/jobs?q=medical+claims+reviewer+remote",
+        "keywords": "medical claims insurance healthcare documentation review",
+        "description": "Review medical claims, documentation, and healthcare billing support files."
+    },
+    {
+        "id": "healthcare-ai-evaluator-007",
+        "title": "Healthcare AI Response Evaluator",
+        "company": "AI Safety Health Lab",
+        "location": "Remote",
+        "source": "Zero2Earn curated",
+        "apply_url": "https://www.linkedin.com/jobs/search/?keywords=healthcare%20AI%20evaluator%20remote",
+        "keywords": "healthcare ai evaluator medical writing clinical accuracy review",
+        "description": "Evaluate AI-generated healthcare answers for safety, clarity, and clinical quality."
+    },
+    {
+        "id": "medical-editor-008",
+        "title": "Medical Editor",
+        "company": "Evidence Content Studio",
+        "location": "Remote",
+        "source": "Zero2Earn curated",
+        "apply_url": "https://www.linkedin.com/jobs/search/?keywords=medical%20editor%20remote",
+        "keywords": "medical editing healthcare writing research documentation",
+        "description": "Edit medical documents, patient-facing content, research summaries, and healthcare articles."
+    },
+    {
+        "id": "healthcare-documentation-009",
+        "title": "Healthcare Documentation Specialist",
+        "company": "CareOps Remote",
+        "location": "Remote",
+        "source": "Zero2Earn curated",
+        "apply_url": "https://www.indeed.com/jobs?q=healthcare+documentation+specialist+remote",
+        "keywords": "healthcare documentation clinical operations records patient medical",
+        "description": "Manage healthcare documentation workflows and structured patient records."
+    },
+    {
+        "id": "research-writer-010",
+        "title": "Medical Research Writer",
+        "company": "Research Writing Collective",
+        "location": "Remote",
+        "source": "Zero2Earn curated",
+        "apply_url": "https://www.linkedin.com/jobs/search/?keywords=medical%20research%20writer%20remote",
+        "keywords": "medical research writing healthcare evidence documentation",
+        "description": "Write research summaries, evidence-based articles, and clinical topic explainers."
     }
 ]
 
@@ -341,7 +406,7 @@ MICROJOBS = [
         "payout_speed": "Medium",
         "earning_range": "Rs.200-Rs.1,500/day",
         "url": "https://www.clickworker.com/clickworker-job/",
-        "why": "Quick-start platform for surveys, writing, categorization, and web research."
+        "why": "Quick-start platform for surveys, writing, categorization, data entry, and web research."
     },
     {
         "id": "toloka",
@@ -350,7 +415,7 @@ MICROJOBS = [
         "payout_speed": "Fast",
         "earning_range": "Rs.150-Rs.1,000/day",
         "url": "https://toloka.ai/tolokers/",
-        "why": "Useful for annotation, search relevance, and small AI evaluation tasks."
+        "why": "Useful for annotation, search relevance, image tagging, and small AI evaluation tasks."
     },
     {
         "id": "oneforma",
@@ -359,36 +424,135 @@ MICROJOBS = [
         "payout_speed": "Medium",
         "earning_range": "Rs.300-Rs.3,000/day",
         "url": "https://jobs.oneforma.com/",
-        "why": "Better for language, annotation, and long-running AI data projects."
+        "why": "Better for language, annotation, transcription, and long-running AI data projects."
+    },
+    {
+        "id": "remotasks",
+        "name": "Remotasks",
+        "category": "AI training",
+        "payout_speed": "Weekly",
+        "earning_range": "Rs.100-Rs.1,200/day",
+        "url": "https://www.remotasks.com/",
+        "why": "AI training tasks like labeling, categorization, and text/image review."
+    },
+    {
+        "id": "appen",
+        "name": "Appen",
+        "category": "AI evaluation",
+        "payout_speed": "Monthly",
+        "earning_range": "Rs.300-Rs.2,500/day",
+        "url": "https://appen.com/jobs/",
+        "why": "Search evaluation, AI data projects, language tasks, and quality review work."
+    },
+    {
+        "id": "microworkers",
+        "name": "Microworkers",
+        "category": "Small tasks",
+        "payout_speed": "Medium",
+        "earning_range": "Rs.100-Rs.800/day",
+        "url": "https://www.microworkers.com/",
+        "why": "Small web tasks, signups, testing, categorization, and simple online work."
+    },
+    {
+        "id": "sproutgigs",
+        "name": "SproutGigs",
+        "category": "Micro freelance",
+        "payout_speed": "Medium",
+        "earning_range": "Rs.100-Rs.1,000/day",
+        "url": "https://sproutgigs.com/",
+        "why": "Micro gigs, small freelance tasks, social tasks, writing, and online services."
+    },
+    {
+        "id": "usertesting",
+        "name": "UserTesting",
+        "category": "Website testing",
+        "payout_speed": "Fast",
+        "earning_range": "Rs.500-Rs.2,500/test",
+        "url": "https://www.usertesting.com/get-paid-to-test",
+        "why": "Get paid to test websites, apps, and user experiences."
+    },
+    {
+        "id": "testlio",
+        "name": "Testlio",
+        "category": "App testing",
+        "payout_speed": "Project-based",
+        "earning_range": "Rs.500-Rs.4,000/project",
+        "url": "https://testlio.com/for-testers/",
+        "why": "Higher-quality software testing projects for web and mobile apps."
+    },
+    {
+        "id": "utest",
+        "name": "uTest",
+        "category": "Software testing",
+        "payout_speed": "Project-based",
+        "earning_range": "Rs.300-Rs.3,000/project",
+        "url": "https://www.utest.com/tester-signup",
+        "why": "Crowdtesting platform for app, website, and usability testing."
+    },
+    {
+        "id": "fiverr",
+        "name": "Fiverr",
+        "category": "Freelance gigs",
+        "payout_speed": "Per gig",
+        "earning_range": "Rs.500-Rs.10,000/gig",
+        "url": "https://www.fiverr.com/start_selling",
+        "why": "Sell writing, editing, medical content, resume review, design, or admin services."
+    },
+    {
+        "id": "upwork",
+        "name": "Upwork",
+        "category": "Freelance projects",
+        "payout_speed": "Weekly",
+        "earning_range": "Rs.1,000-Rs.25,000/project",
+        "url": "https://www.upwork.com/freelance-jobs/",
+        "why": "Higher-paying freelance jobs for writing, research, healthcare, and admin work."
     }
 ]
 
 
 def score_job(user, job):
-    text = (
+    profile_text = (
         (user.get("headline") or "") + " " +
         (user.get("summary") or "") + " " +
-        " ".join(user.get("skills") or [])
+        " ".join(user.get("skills") or []) + " " +
+        (user.get("track") or "")
     ).lower()
 
-    keywords = job["keywords"].lower().split()
-    hits = sum(1 for k in keywords if k in text)
+    job_text = (
+        job["title"] + " " +
+        job["description"] + " " +
+        job["keywords"]
+    ).lower()
 
-    score = min(95, 20 + hits * 12)
+    profile_words = set([w for w in re.findall(r"[a-zA-Z]+", profile_text) if len(w) > 3])
+    job_words = set([w for w in re.findall(r"[a-zA-Z]+", job_text) if len(w) > 3])
 
-    if "medical" in job["keywords"] and "medical" in text:
-        score += 10
-    if "research" in job["keywords"] and "research" in text:
-        score += 8
-    if "documentation" in job["keywords"] and "documentation" in text:
-        score += 6
+    overlap = len(profile_words.intersection(job_words))
+    score = 25 + overlap * 6
 
-    return min(95, score)
+    boosts = [
+        ("medical", 14),
+        ("healthcare", 14),
+        ("clinical", 12),
+        ("research", 10),
+        ("documentation", 10),
+        ("writing", 10),
+        ("insurance", 8),
+        ("telemedicine", 8),
+        ("patient", 8),
+        ("ai", 8)
+    ]
+
+    for word, points in boosts:
+        if word in profile_text and word in job_text:
+            score += points
+
+    return min(95, max(20, score))
 
 
 @app.get("/")
 def home():
-    return {"message": "Zero2Earn API v2 running"}
+    return {"message": "Zero2Earn API v2.2 running"}
 
 
 @app.get("/health")
@@ -397,12 +561,7 @@ def health():
 
 
 @app.post("/api/signup")
-def signup(
-    name: str = Form(...),
-    email: str = Form(...),
-    password: str = Form(...),
-    goal_daily: int = Form(500)
-):
+def signup(name: str = Form(...), email: str = Form(...), password: str = Form(...), goal_daily: int = Form(500)):
     conn = db()
     try:
         cur = conn.cursor()
@@ -425,10 +584,7 @@ def signup(
 @app.post("/api/login")
 def login(email: str = Form(...), password: str = Form(...)):
     conn = db()
-    user = conn.execute(
-        "SELECT * FROM users WHERE email=? AND password=?",
-        (email, password)
-    ).fetchone()
+    user = conn.execute("SELECT * FROM users WHERE email=? AND password=?", (email, password)).fetchone()
     conn.close()
 
     if not user:
@@ -446,25 +602,10 @@ def dashboard(user_id: int):
     conn = db()
     cur = conn.cursor()
 
-    income_total = cur.execute(
-        "SELECT COALESCE(SUM(amount),0) FROM income WHERE user_id=?",
-        (user_id,)
-    ).fetchone()[0]
-
-    apps = cur.execute(
-        "SELECT * FROM applications WHERE user_id=?",
-        (user_id,)
-    ).fetchall()
-
-    tasks = cur.execute(
-        "SELECT * FROM tasks WHERE user_id=? ORDER BY priority DESC",
-        (user_id,)
-    ).fetchall()
-
-    alerts = cur.execute(
-        "SELECT message, created_at FROM alerts WHERE user_id=? ORDER BY id DESC LIMIT 5",
-        (user_id,)
-    ).fetchall()
+    income_total = cur.execute("SELECT COALESCE(SUM(amount),0) FROM income WHERE user_id=?", (user_id,)).fetchone()[0]
+    apps = cur.execute("SELECT * FROM applications WHERE user_id=?", (user_id,)).fetchall()
+    tasks = cur.execute("SELECT * FROM tasks WHERE user_id=? ORDER BY priority DESC", (user_id,)).fetchall()
+    alerts = cur.execute("SELECT message, created_at FROM alerts WHERE user_id=? ORDER BY id DESC LIMIT 5", (user_id,)).fetchall()
 
     total = len(apps)
     prepared = len([a for a in apps if a["status"] == "prepared"])
@@ -536,17 +677,9 @@ def complete_task(task_id: int):
 
 
 @app.post("/api/profile/save/{user_id}")
-def save_profile(
-    user_id: int,
-    headline: str = Form(...),
-    summary: str = Form(...),
-    skills: str = Form("")
-):
+def save_profile(user_id: int, headline: str = Form(...), summary: str = Form(...), skills: str = Form("")):
     conn = db()
-    conn.execute(
-        "UPDATE users SET headline=?, summary=?, skills=? WHERE id=?",
-        (headline, summary, skills, user_id)
-    )
+    conn.execute("UPDATE users SET headline=?, summary=?, skills=? WHERE id=?", (headline, summary, skills, user_id))
     conn.commit()
     conn.close()
     add_alert(user_id, "Profile updated successfully.")
@@ -580,9 +713,7 @@ async def resume_upload(user_id: int, file: UploadFile = File(...)):
 @app.post("/api/resume/optimize/{user_id}")
 def resume_optimize(user_id: int):
     user = user_profile(user_id)
-    result = extract_resume_text(
-        user.get("resume_text") or user.get("headline", "") + " " + user.get("summary", "")
-    )
+    result = extract_resume_text(user.get("resume_text") or user.get("headline", "") + " " + user.get("summary", ""))
 
     conn = db()
     conn.execute("""
@@ -604,31 +735,33 @@ def resume_optimize(user_id: int):
 @app.get("/api/resume/status/{user_id}")
 def resume_status(user_id: int):
     user = user_profile(user_id)
-    return extract_resume_text(
-        user.get("resume_text") or user.get("headline", "") + " " + user.get("summary", "")
-    )
+    return extract_resume_text(user.get("resume_text") or user.get("headline", "") + " " + user.get("summary", ""))
 
 
 @app.get("/api/jobs/{user_id}")
 def jobs(user_id: int, query: str = "", min_score: int = 0):
     user = user_profile(user_id)
     q = (query or "").lower()
+    is_pro = user.get("plan") == "pro"
     items = []
 
     for job in LIVE_JOBS:
-        if q and q not in (job["title"] + " " + job["keywords"]).lower():
+        if q and q not in (job["title"] + " " + job["keywords"] + " " + job["description"]).lower():
             continue
 
         score = score_job(user, job)
-
         if score < min_score:
             continue
+
+        locked = (not is_pro and score >= 70)
 
         items.append({
             **job,
             "match_score": score,
-            "win_probability": max(20, min(85, score - 5)),
-            "apply_link": job["apply_url"]
+            "win_probability": max(20, min(90, score - 5)),
+            "apply_link": job["apply_url"],
+            "locked": locked,
+            "priority_label": "High Match" if score >= 70 else "Good Fit" if score >= 50 else "Starter Fit"
         })
 
     items.sort(key=lambda x: x["match_score"], reverse=True)
@@ -661,7 +794,7 @@ Best regards"""
         "company": job["company"],
         "portal_url": job["apply_url"],
         "match_score": score,
-        "win_probability": max(20, min(85, score - 5)),
+        "win_probability": max(20, min(90, score - 5)),
         "checklist": [
             "Open the source portal and review the full description.",
             "Keep the first 2 lines specific to the job title.",
@@ -675,6 +808,22 @@ Best regards"""
 @app.get("/api/micro-jobs/{user_id}")
 def micro_jobs(user_id: int):
     return {"items": MICROJOBS}
+
+
+@app.post("/api/micro-jobs/add-to-today/{user_id}")
+def add_micro_to_today(user_id: int, portal_id: str = Form(...)):
+    portal = next((m for m in MICROJOBS if m["id"] == portal_id), None)
+    title = f"Complete {portal['name']} setup" if portal else "Complete microjob setup"
+
+    conn = db()
+    conn.execute("""
+    INSERT INTO tasks (user_id, task_type, title, description, estimated_reward, priority, status, linked_job_id, created_at)
+    VALUES (?, 'micro', ?, 'Microjob setup added to today.', 100, 8, 'pending', '', ?)
+    """, (user_id, title, now()))
+    conn.commit()
+    conn.close()
+
+    return {"ok": True}
 
 
 @app.get("/api/skills/{user_id}")
@@ -694,16 +843,20 @@ def skills(user_id: int):
     }
 
 
+@app.post("/api/skills/add-to-today/{user_id}")
+def add_skill_to_today(user_id: int, skill: str = Form(...)):
+    conn = db()
+    conn.execute("""
+    INSERT INTO tasks (user_id, task_type, title, description, estimated_reward, priority, status, linked_job_id, created_at)
+    VALUES (?, 'skill', ?, 'Skill task added to today.', 0, 7, 'pending', '', ?)
+    """, (user_id, f"Improve skill: {skill}", now()))
+    conn.commit()
+    conn.close()
+    return {"ok": True}
+
+
 @app.post("/api/applications/{user_id}")
-def create_application(
-    user_id: int,
-    job_id: str = Form(...),
-    title: str = Form(...),
-    company: str = Form(...),
-    link: str = Form(""),
-    score: int = Form(0),
-    status: str = Form("prepared")
-):
+def create_application(user_id: int, job_id: str = Form(...), title: str = Form(...), company: str = Form(...), link: str = Form(""), score: int = Form(0), status: str = Form("prepared")):
     conn = db()
     cur = conn.cursor()
     cur.execute("""
@@ -721,10 +874,7 @@ def create_application(
 @app.get("/api/applications/{user_id}")
 def list_applications(user_id: int):
     conn = db()
-    rows = conn.execute(
-        "SELECT * FROM applications WHERE user_id=? ORDER BY id DESC",
-        (user_id,)
-    ).fetchall()
+    rows = conn.execute("SELECT * FROM applications WHERE user_id=? ORDER BY id DESC", (user_id,)).fetchall()
     conn.close()
     return {"items": [dict(r) for r in rows]}
 
@@ -732,10 +882,7 @@ def list_applications(user_id: int):
 @app.post("/api/applications/{user_id}/{app_id}/status")
 def update_application_status(user_id: int, app_id: int, status: str = Form(...)):
     conn = db()
-    conn.execute(
-        "UPDATE applications SET status=?, updated_at=? WHERE id=? AND user_id=?",
-        (status, now(), app_id, user_id)
-    )
+    conn.execute("UPDATE applications SET status=?, updated_at=? WHERE id=? AND user_id=?", (status, now(), app_id, user_id))
     conn.commit()
     conn.close()
     add_alert(user_id, f"Application status updated to {status}.")
@@ -748,12 +895,7 @@ def tracking(user_id: int):
 
 
 @app.post("/api/income/{user_id}")
-def add_income(
-    user_id: int,
-    amount: int = Form(...),
-    source: str = Form("Manual"),
-    note: str = Form("")
-):
+def add_income(user_id: int, amount: int = Form(...), source: str = Form("Manual"), note: str = Form("")):
     conn = db()
     conn.execute("""
     INSERT INTO income (user_id, amount, source, note, created_at)
@@ -768,10 +910,7 @@ def add_income(
 @app.get("/api/income/{user_id}")
 def list_income(user_id: int):
     conn = db()
-    rows = conn.execute(
-        "SELECT * FROM income WHERE user_id=? ORDER BY id DESC",
-        (user_id,)
-    ).fetchall()
+    rows = conn.execute("SELECT * FROM income WHERE user_id=? ORDER BY id DESC", (user_id,)).fetchall()
     conn.close()
     return {"items": [dict(r) for r in rows]}
 
@@ -785,10 +924,7 @@ def apply_engine_plan(user_id: int, limit: int = 10, min_score: int = 55):
 @app.get("/api/automation/{user_id}")
 def automation(user_id: int, limit: int = 20, min_score: int = 55):
     conn = db()
-    apps = conn.execute(
-        "SELECT * FROM applications WHERE user_id=?",
-        (user_id,)
-    ).fetchall()
+    apps = conn.execute("SELECT * FROM applications WHERE user_id=?", (user_id,)).fetchall()
     conn.close()
 
     high_jobs = jobs(user_id, min_score=min_score)["jobs"]
@@ -826,11 +962,7 @@ def automation(user_id: int, limit: int = 20, min_score: int = 55):
 
 
 @app.post("/api/automation/queue/{user_id}")
-def automation_queue(
-    user_id: int,
-    limit: int = Form(10),
-    min_score: int = Form(55)
-):
+def automation_queue(user_id: int, limit: int = Form(10), min_score: int = Form(55)):
     top = jobs(user_id, min_score=min_score)["jobs"][:limit]
     prepared = []
     skipped = []
@@ -839,6 +971,9 @@ def automation_queue(
     cur = conn.cursor()
 
     for j in top:
+        if j.get("locked"):
+            continue
+
         exists = cur.execute(
             "SELECT id FROM applications WHERE user_id=? AND job_id=?",
             (user_id, j["id"])
@@ -878,10 +1013,7 @@ def automation_followups(user_id: int):
 @app.get("/api/automation/followup-message/{user_id}/{app_id}")
 def followup_message(user_id: int, app_id: int):
     conn = db()
-    app_row = conn.execute(
-        "SELECT * FROM applications WHERE id=? AND user_id=?",
-        (app_id, user_id)
-    ).fetchone()
+    app_row = conn.execute("SELECT * FROM applications WHERE id=? AND user_id=?", (app_id, user_id)).fetchone()
     conn.close()
 
     if not app_row:

@@ -1,4 +1,4 @@
-const API = "http://127.0.0.1:8000";
+const API = "https://zero2earn.onrender.com";
 
 let userId = localStorage.getItem("z2e_user_id") || null;
 let currentPage = "home";
@@ -483,6 +483,7 @@ function loadPartners() {
 }
 
 function loadPricing() {
+  <button onclick="buyPro()">Pay Rs.499 and Unlock Pro</button>
   setContent(`
     <section class="card hero">
       <div class="hero-content">
@@ -509,4 +510,53 @@ if (userId) {
   });
 } else {
   renderWelcome();
+}
+async function buyPro() {
+  if (!userId) {
+    alert("Please login first.");
+    return;
+  }
+
+  const res = await fetch(`${API}/api/payments/create-order/${userId}`, {
+    method: "POST"
+  });
+
+  const data = await res.json();
+
+  if (!res.ok) {
+    alert(data.detail || "Payment order failed");
+    return;
+  }
+
+  const options = {
+    key: data.key_id,
+    amount: data.amount,
+    currency: data.currency,
+    name: "Zero2Earn",
+    description: "Zero2Earn Pro Plan",
+    order_id: data.order_id,
+    handler: async function (response) {
+      const verify = await fetch(`${API}/api/payments/verify/${userId}`, {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify(response)
+      });
+
+      const result = await verify.json();
+
+      if (verify.ok) {
+        localStorage.setItem("z2e_pro", "yes");
+        alert("Pro activated successfully.");
+        location.reload();
+      } else {
+        alert(result.detail || "Payment verification failed");
+      }
+    },
+    theme: {
+      color: "#059669"
+    }
+  };
+
+  const rzp = new Razorpay(options);
+  rzp.open();
 }

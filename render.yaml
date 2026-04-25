@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: zero2earn-ai
+    env: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: python seed_data.py && uvicorn zero2earn_backend.api.app:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: DATA_DIR
+        value: /var/data
+      - key: DATABASE_PATH
+        value: /var/data/zero2earn.db
+    disk:
+      name: zero2earn-data
+      mountPath: /var/data
+      sizeGB: 1

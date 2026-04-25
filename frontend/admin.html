@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Zero2Earn Admin</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-mark">A</div>
+      <div>
+        <div class="logo">Admin<span>Panel</span></div>
+        <div class="tagline">Zero2Earn SaaS control room</div>
+      </div>
+    </div>
+
+    <div class="nav">
+      <button onclick="loadAdmin()" class="active">Dashboard</button>
+      <button onclick="loadLeads()">Partner Leads</button>
+      <button onclick="loadUsers()">Users</button>
+      <button onclick="window.location.href='app.html'">User App</button>
+      <button onclick="window.location.href='index.html'">Website</button>
+    </div>
+
+    <div class="sidebar-panel">
+      <b>Founder View</b>
+      <p class="small muted">Track users, leads, revenue, and growth.</p>
+      <span class="badge gold">Admin MVP</span>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <div class="title">
+        <span class="kicker">Zero2Earn SaaS</span>
+        <h1 id="pageTitle">Admin Dashboard</h1>
+        <p id="pageSub">Business command center</p>
+      </div>
+
+      <div class="auth-card">
+        <button onclick="loadAdmin()">Refresh</button>
+      </div>
+    </div>
+
+    <div id="content"></div>
+
+    <footer>Zero2Earn Admin � users, leads, revenue, and institutional growth.</footer>
+  </main>
+</div>
+
+<script>
+const API = "http://127.0.0.1:8000";
+
+function setContent(html){
+  document.getElementById("content").innerHTML = html;
+}
+
+async function getJSON(path){
+  const res = await fetch(API + path);
+  return await res.json();
+}
+
+async function loadAdmin(){
+  document.getElementById("pageTitle").innerText = "Admin Dashboard";
+  document.getElementById("pageSub").innerText = "Business command center";
+
+  const d = await getJSON("/api/admin/stats");
+
+  setContent(`
+    <section class="card hero">
+      <div class="hero-content">
+        <h2>Zero2Earn Growth Cockpit</h2>
+        <p>Monitor users, applications, income, leads, and future SaaS revenue.</p>
+        <span class="badge">Founder dashboard</span>
+        <span class="badge blue">SaaS metrics</span>
+        <span class="badge gold">Partner pipeline</span>
+      </div>
+    </section>
+
+    <div class="grid">
+      <div class="metric"><h2>${d.total_users}</h2><p>Total users</p></div>
+      <div class="metric"><h2>${d.total_applications}</h2><p>Applications</p></div>
+      <div class="metric"><h2>Rs.${d.total_income}</h2><p>User income tracked</p></div>
+      <div class="metric"><h2>${d.partner_leads}</h2><p>Partner leads</p></div>
+      <div class="metric"><h2>${d.pro_users}</h2><p>Pro users</p></div>
+      <div class="metric"><h2>Rs.${d.monthly_revenue}</h2><p>Monthly revenue</p></div>
+      <div class="grid">
+  <div class="metric">
+    <h2>Rs.${d.monthly_revenue}</h2>
+    <p>MRR</p>
+  </div>
+
+  <div class="metric">
+    <h2>${d.total_users > 0 ? Math.round(d.monthly_revenue / d.total_users) : 0}</h2>
+    <p>ARPU</p>
+  </div>
+
+  <div class="metric">
+    <h2>0%</h2>
+    <p>Free → Pro Conversion</p>
+  </div>
+</div>
+
+    <div class="card">
+      <h2>Next Founder Actions</h2>
+      <div class="item">1. Collect college/company leads from Partners page.</div>
+      <div class="item">2. Convert early users into Pro plan after public launch.</div>
+      <div class="item">3. Improve job matching to increase application success.</div>
+      <div class="item">4. Add Razorpay after website + app deployment.</div>
+    </div>
+  `);
+}
+
+async function loadLeads(){
+  document.getElementById("pageTitle").innerText = "Partner Leads";
+  document.getElementById("pageSub").innerText = "College/company interest pipeline";
+
+  const d = await getJSON("/api/admin/leads");
+
+  let html = `
+    <section class="card hero">
+      <div class="hero-content">
+        <h2>Partner Lead Pipeline</h2>
+        <p>Colleges, companies, and training partners who showed interest.</p>
+      </div>
+    </section>
+
+    <div class="card">
+      <h2>Add Lead Manually</h2>
+      <input id="leadName" placeholder="Name">
+      <input id="leadEmail" placeholder="Email">
+      <input id="leadOrg" placeholder="College / Company">
+      <input id="leadType" placeholder="college/company/partner">
+      <button onclick="saveLead()">Save Lead</button>
+    </div>
+
+    <div class="card">
+      <h2>Leads</h2>
+  `;
+
+  if(!d.items || d.items.length === 0){
+    html += `<p class="muted">No leads yet.</p>`;
+  } else {
+    d.items.forEach(l => {
+      html += `
+        <div class="item">
+          <h3>${l.name}</h3>
+          <p>${l.email}</p>
+          <span class="badge">${l.organization}</span>
+          <span class="badge blue">${l.lead_type}</span>
+          <p class="muted">${l.created_at}</p>
+        </div>
+      `;
+    });
+  }
+
+  html += `</div>`;
+  setContent(html);
+}
+
+async function saveLead(){
+  const form = new URLSearchParams();
+  form.append("name", document.getElementById("leadName").value);
+  form.append("email", document.getElementById("leadEmail").value);
+  form.append("organization", document.getElementById("leadOrg").value);
+  form.append("lead_type", document.getElementById("leadType").value || "partner");
+
+  await fetch(API + "/api/admin/leads", {
+    method:"POST",
+    headers:{"Content-Type":"application/x-www-form-urlencoded"},
+    body:form
+  });
+
+  loadLeads();
+}
+
+async function loadUsers(){
+  document.getElementById("pageTitle").innerText = "Users";
+  document.getElementById("pageSub").innerText = "Registered user base";
+
+  const d = await getJSON("/api/admin/users");
+
+  let html = `
+    <section class="card hero">
+      <div class="hero-content">
+        <h2>User Base</h2>
+        <p>People using Zero2Earn and their earning tracks.</p>
+      </div>
+    </section>
+
+    <div class="card">
+      <h2>Users</h2>
+  `;
+
+  if(!d.items || d.items.length === 0){
+    html += `<p class="muted">No users found.</p>`;
+  } else {
+    d.items.forEach(u => {
+      html += `
+        <div class="item">
+          <h3>${u.name || "User"}</h3>
+          <p>${u.email || ""}</p>
+          <span class="badge">ID: ${u.id}</span>
+          <span class="badge blue">${u.track || "No track"}</span>
+          <span class="badge gold">Goal Rs.${u.goal_daily || 0}</span>
+        </div>
+      `;
+    });
+  }
+
+  html += `</div>`;
+  setContent(html);
+}
+
+loadAdmin();
+</script>
+</body>
+</html>

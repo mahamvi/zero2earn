@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Zero2Earn AI</title>
+  <link rel="stylesheet" href="/static/styles.css" />
+</head>
+<body>
+  <div id="auth" class="auth-shell">
+    <div class="auth-card">
+      <h1>Zero2Earn AI</h1>
+      <p>AI Career + Income Operating System</p>
+      <form id="login-form">
+        <input name="email" value="demo@zero2earn.ai" placeholder="Email" />
+        <input name="password" type="password" value="demo123" placeholder="Password" />
+        <button type="submit">Login</button>
+      </form>
+      <small>Demo: demo@zero2earn.ai / demo123</small>
+      <hr style="border-color:#2a3153;margin:18px 0" />
+      <h3>Create account</h3>
+      <form id="signup-form">
+        <input name="name" placeholder="Full name" />
+        <input name="email" placeholder="Email" />
+        <input name="password" type="password" placeholder="Password min 6 chars" />
+        <input name="goal_daily" type="number" value="500" placeholder="Daily target ₹" />
+        <button type="submit" class="btn secondary">Create SaaS user</button>
+      </form>
+    </div>
+  </div>
+
+  <div id="app" class="hidden">
+    <aside class="sidebar">
+      <div class="brand">Zero2Earn AI</div>
+      <div id="user-track" class="badge"></div>
+      <nav>
+        <button data-tab="home" class="tab-btn active">Home</button>
+        <button data-tab="resume" class="tab-btn">Resume First</button>
+        <button data-tab="jobs" class="tab-btn">Jobs</button>
+        <button data-tab="micro" class="tab-btn">Micro Jobs</button>
+        <button data-tab="skills" class="tab-btn">Skills</button>
+        <button data-tab="income" class="tab-btn">Income</button>
+        <button data-tab="applications" class="tab-btn">Applications</button>
+        <button data-tab="automation" class="tab-btn">Automation</button>
+        <button data-tab="coach" class="tab-btn">AI Coach</button>
+        <button data-tab="rm" class="tab-btn">RM</button>
+      </nav>
+    </aside>
+    <main class="main">
+      <header class="topbar">
+        <div>
+          <h2 id="screen-title">Home</h2>
+          <p id="screen-subtitle">Your command center</p>
+        </div>
+        <button id="refresh-all">Refresh</button>
+      </header>
+
+      <section id="home" class="tab-panel active"></section>
+      <section id="resume" class="tab-panel"></section>
+      <section id="jobs" class="tab-panel"></section>
+      <section id="micro" class="tab-panel"></section>
+      <section id="skills" class="tab-panel"></section>
+      <section id="income" class="tab-panel"></section>
+      <section id="applications" class="tab-panel"></section>
+      <section id="automation" class="tab-panel"></section>
+      <section id="coach" class="tab-panel"></section>
+      <section id="rm" class="tab-panel"></section>
+    </main>
+  </div>
+
+  <div id="wingman-modal" class="modal hidden">
+    <div class="modal-card">
+      <div class="modal-head">
+        <h3>Wingman</h3>
+        <button id="close-modal">×</button>
+      </div>
+      <div id="wingman-content"></div>
+    </div>
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>

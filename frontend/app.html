@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Zero2Earn App</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-mark">Z</div>
+      <div>
+        <div class="logo">Zero<span>2Earn</span></div>
+        <div class="tagline">AI-powered earning OS</div>
+      </div>
+    </div>
+
+    <div class="nav">
+      <button id="nav-home" onclick="showPage('home')" class="active">Home</button>
+      <button id="nav-resume" onclick="showPage('resume')">Resume First</button>
+      <button id="nav-jobs" onclick="showPage('jobs')">Jobs</button>
+      <button id="nav-micro" onclick="showPage('micro')">Micro Jobs</button>
+      <button id="nav-automation" onclick="showPage('automation')">Automation</button>
+      <button id="nav-partners" onclick="showPage('partners')">Partners</button>
+      <button id="nav-pricing" onclick="showPage('pricing')">Plans</button>
+    </div>
+
+    <div class="sidebar-panel">
+      <b>SaaS Revenue Engine</b>
+      <p class="small muted">Users, colleges, companies, and featured hiring.</p>
+      <span class="badge gold">MVP Active</span>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <div class="title">
+        <span class="kicker">AI Career + Income Platform</span>
+        <h1 id="pageTitle">Home</h1>
+        <p id="pageSub">Your premium earning command center</p>
+      </div>
+
+      <div class="auth-card" id="loginBox">
+        <input id="emailInput" value="test@zero2earn.com">
+        <input id="passwordInput" type="password" value="123456">
+        <button onclick="login()">Login</button>
+        <div id="status" class="muted small"></div>
+      </div>
+
+      <div class="auth-card hidden" id="userBox">
+        <b id="userMini">Logged in</b><br>
+        <span class="muted small" id="proMini">Free plan</span><br><br>
+        <button class="soft" onclick="refresh()">Refresh</button>
+        <button class="secondary" onclick="logout()">Logout</button>
+      </div>
+    </div>
+
+    <div id="content"></div>
+
+    <footer>
+      Zero2Earn AI — public website + app-ready SaaS build.
+    </footer>
+  </main>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>

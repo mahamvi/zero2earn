@@ -10,4 +10,4 @@ RUN pip install --no-cache-dir --upgrade pip && pip install --no-cache-dir -r re
 COPY . .
 RUN mkdir -p /data
 EXPOSE 8000
-CMD ["sh", "-c", "python seed_data.py && uvicorn zero2earn_backend.api.app:app --host 0.0.0.0 --port ${PORT:-8000}"]
+CMD sh -c "uvicorn zero2earn_backend.api.app:app --host 0.0.0.0 --port ${PORT:-8000}"

@@ -3499,3 +3499,48 @@ def telegram_events_user(user_id: int):
     events=rows_to_dicts(conn.execute("SELECT * FROM telegram_events WHERE user_id=? ORDER BY id DESC LIMIT 50", (user_id,)).fetchall())
     conn.close()
     return {"items": events}
+    import threading, time
+
+def telegram_scheduler_loop():
+    print("🚀 Telegram Scheduler Started")
+
+    while True:
+        try:
+            conn = db()
+            users = rows_to_dicts(conn.execute(
+                "SELECT id FROM users WHERE telegram_chat_id!='' AND notification_opt_in=1"
+            ).fetchall())
+            conn.close()
+
+            for u in users:
+                uid = u["id"]
+
+                # Morning Daily Command
+                telegram_send_daily(uid)
+
+                # Job alert
+                telegram_send_job(uid)
+
+                # Upgrade nudge (only free users)
+                try:
+                    status = billing_status(uid)
+                    if not status.get("is_pro"):
+                        telegram_send_upgrade(uid)
+                except:
+                    pass
+
+            # run every 6 hours
+            time.sleep(21600)
+
+        except Exception as e:
+            print("Telegram scheduler error:", e)
+            time.sleep(60)
+
+
+def start_scheduler():
+    t = threading.Thread(target=telegram_scheduler_loop, daemon=True)
+    t.start()
+
+
+# START AUTOMATION
+start_scheduler()

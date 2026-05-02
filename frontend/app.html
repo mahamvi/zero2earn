@@ -1,70 +1,2855 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Zero2Earn App</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="./styles.css">
-  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<meta charset="UTF-8">
+<title>Zero2Earn AI</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Inter,Segoe UI,Arial,sans-serif;background:#06101f;color:#eef6ff}
+.app{display:grid;grid-template-columns:280px 1fr;min-height:100vh}
+.side{background:linear-gradient(180deg,#020617,#07111f);padding:24px;border-right:1px solid #1e293b}
+.logo{width:56px;height:56px;border-radius:20px;background:linear-gradient(135deg,#38bdf8,#2563eb,#7c3aed);display:grid;place-items:center;font-size:30px;font-weight:900;box-shadow:0 18px 45px #2563eb66}
+.side h1{margin:16px 0 4px;font-size:26px}.side p{margin:0 0 26px;color:#94a3b8}
+.nav button{width:100%;padding:14px 16px;margin:7px 0;border:1px solid #1e293b;border-radius:16px;background:#0f172a;color:#eaf2ff;text-align:left;font-size:15px;cursor:pointer}
+.nav button:hover{background:#1d4ed8;transform:translateX(3px)}
+.main{padding:28px}.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:22px;gap:16px}
+.top h2{font-size:34px;margin:0}.top p{color:#94a3b8;margin:6px 0}
+.user{background:#0f172a;border:1px solid #1e293b;border-radius:20px;padding:14px 18px;min-width:180px}
+.hero{background:radial-gradient(circle at top left,#2563eb,#0f172a 55%,#020617);border:1px solid #1e40af;border-radius:32px;padding:34px;display:grid;grid-template-columns:1fr 250px;gap:24px;box-shadow:0 24px 70px #0008;margin-bottom:24px}
+.hero h1{font-size:42px;margin:0 0 12px;line-height:1.1}.hero p{font-size:17px;color:#dbeafe;max-width:900px}
+.target{background:#ffffff12;border:1px solid #ffffff24;border-radius:24px;padding:22px}.target h2{font-size:40px;margin:8px 0 0}
+.page{display:none}.page.active{display:block}.hidden{display:none!important}
+.panel,.card,.metric{background:#0f172a;border:1px solid #1e293b;border-radius:24px;padding:22px;margin-bottom:18px;box-shadow:0 12px 30px #0003}
+.glow{background:linear-gradient(135deg,#0f172a,#111c34);border-color:#2563eb}
+.grid{display:grid;gap:18px}.grid2{grid-template-columns:repeat(2,1fr)}.grid3{grid-template-columns:repeat(3,1fr)}.grid4{grid-template-columns:repeat(4,1fr)}
+.metric span{color:#94a3b8}.metric h3{font-size:32px;margin:8px 0}
+input,textarea,select{width:100%;padding:14px;border-radius:15px;border:1px solid #334155;background:#020617;color:white;margin:8px 0;font-size:14px}
+textarea{min-height:120px}
+button,a.btn{background:#2563eb;color:white;border:0;border-radius:14px;padding:12px 16px;text-decoration:none;display:inline-block;margin:6px 6px 6px 0;cursor:pointer;font-weight:700}
+button:hover,a.btn:hover{background:#1d4ed8}.secondary{background:#1e293b!important}.green{background:#16a34a!important}.warn{background:#f59e0b!important;color:#111827!important}
+.login{max-width:480px}.jobs{display:grid;grid-template-columns:repeat(auto-fill,minmax(350px,1fr));gap:18px}
+.card h3{margin:0 0 8px;font-size:20px}.score{float:right;background:#16a34a;padding:10px 13px;border-radius:999px;font-weight:900}
+.card p{color:#cbd5e1}.chip{display:inline-block;background:#1e293b;border:1px solid #334155;color:#cbd5e1;padding:8px 12px;border-radius:999px;margin:5px 5px 5px 0;font-size:13px}
+.details{background:#020617;border:1px solid #1e293b;border-radius:16px;padding:14px;margin-top:12px}.small{font-size:13px;color:#94a3b8}
+.error{background:#7f1d1d;border:1px solid #ef4444;padding:18px;border-radius:18px}.success{background:#064e3b;border:1px solid #10b981;padding:18px;border-radius:18px}
+.bar{height:12px;background:#1e293b;border-radius:999px;overflow:hidden;margin:10px 0}.fill{height:100%;background:#22c55e;border-radius:999px}
+@media(max-width:950px){.app{grid-template-columns:1fr}.hero{grid-template-columns:1fr}.grid2,.grid3,.grid4{grid-template-columns:1fr}.top{flex-direction:column;align-items:flex-start}}
+
+/* Z2E_LAYOUT_RESET_FIX */
+body.logged-in #landingHero{display:none!important}
+body.logged-in #loginBox{display:none!important}
+body.logged-in .public-cta{display:none!important}
+body.logged-in .public-only{display:none!important}
+.page{min-height:auto!important}
+main{min-height:calc(100vh - 40px)!important}
+
+/* Z2E COMMAND CENTER FINAL — NO FEATURE LOSS */
+:root{
+  --z2e-bg:#06101f;
+  --z2e-card:#0f172a;
+  --z2e-line:#1e293b;
+  --z2e-green:#22c55e;
+  --z2e-blue:#38bdf8;
+  --z2e-gold:#fbbf24;
+  --z2e-muted:#94a3b8;
+}
+.side{position:sticky;top:0;height:100vh;overflow:auto}
+.command-note{font-size:12px;color:#94a3b8;margin:10px 0 14px;line-height:1.4}
+.nav-primary>button{background:linear-gradient(135deg,#16a34a,#2563eb)!important;font-weight:900;border-color:#38bdf855!important}
+.nav-group{margin:8px 0 14px;border:1px solid #1e293b;border-radius:18px;background:#08111f;overflow:hidden}
+.nav-group-title{width:100%;display:flex;align-items:center;justify-content:space-between;padding:13px 14px;background:linear-gradient(135deg,#0f172a,#111c34);color:#eaf2ff;border:0;text-align:left;font-weight:800;cursor:pointer}
+.nav-group-title:hover{background:#1d4ed8;transform:none}
+.nav-group-body{display:none;padding:8px}
+.nav-group.open .nav-group-body{display:block}
+.nav-group-body button{font-size:13px;margin:5px 0;padding:11px 12px;border-radius:13px}
+.side .nav button.active-nav{outline:2px solid #38bdf8;background:#1d4ed8!important}
+.mission-hero-final{
+  position:relative;overflow:hidden;
+  background:
+    radial-gradient(circle at top left,#16a34a44,transparent 30%),
+    radial-gradient(circle at bottom right,#2563eb55,transparent 32%),
+    linear-gradient(135deg,#06101f,#0f172a 50%,#020617);
+  border:1px solid #22c55e55;
+  border-radius:34px;
+  padding:34px;
+  margin-bottom:20px;
+  box-shadow:0 24px 80px #0009,0 0 40px #22c55e22;
+}
+.mission-hero-final:before{
+  content:"";position:absolute;inset:-1px;
+  background:linear-gradient(120deg,transparent,#38bdf820,transparent);
+  pointer-events:none;
+}
+.mission-kicker{color:#38bdf8;font-size:13px;font-weight:900;letter-spacing:.08em;text-transform:uppercase}
+.mission-money{font-size:70px;line-height:1;font-weight:1000;margin:12px 0;background:linear-gradient(135deg,#fff,#22c55e,#fbbf24);-webkit-background-clip:text;color:transparent}
+.mission-next{font-size:25px;margin:12px 0;color:#eef6ff}
+.mission-sub{color:#cbd5e1;max-width:780px}
+.mission-cta-row{display:flex;gap:12px;flex-wrap:wrap;margin-top:18px}
+.primary-big{font-size:18px;padding:16px 24px!important;border-radius:18px!important;box-shadow:0 0 28px #22c55e55}
+.reward-toast{display:none;position:fixed;right:28px;bottom:28px;z-index:9999;background:#052e16;border:1px solid #22c55e;border-radius:20px;padding:16px 18px;box-shadow:0 18px 45px #0009;color:#dcfce7;max-width:360px}
+.reward-toast.show{display:block;animation:z2ePop .4s ease}
+@keyframes z2ePop{0%{transform:translateY(20px);opacity:0}100%{transform:translateY(0);opacity:1}}
+.focus-grid{display:grid;grid-template-columns:1.2fr .8fr;gap:18px}
+.next-action-card{background:linear-gradient(135deg,#052e16,#0f172a);border:1px solid #22c55e55;border-radius:26px;padding:24px}
+.next-action-card h3{font-size:28px;margin:8px 0}
+.priority-portal{background:linear-gradient(135deg,#172554,#0f172a);border:1px solid #38bdf855;border-radius:26px;padding:24px}
+.priority-portal h3{font-size:26px;margin:4px 0 8px}
+.action-strip{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+.action-strip button{border-radius:16px}
+.collapsed-section{margin-top:18px}
+.collapsed-section summary{cursor:pointer;font-weight:900;padding:16px;border:1px solid #334155;border-radius:18px;background:#0f172a}
+.collapsed-section[open] summary{border-color:#38bdf8}
+.mini-steps{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:18px}
+.mini-step{padding:15px;border:1px solid #1e293b;border-radius:18px;background:#0b1220}
+.mini-step b{display:block;color:#fff;margin-bottom:6px}
+.mini-step span{color:#94a3b8;font-size:13px}
+.wow-chip{display:inline-block;border:1px solid #334155;background:#02061799;border-radius:999px;padding:8px 12px;margin:5px;color:#cbd5e1}
+.portal-grid-compact{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;margin-top:16px}
+.portal-card-compact{background:#0f172a;border:1px solid #1e293b;border-radius:22px;padding:18px}
+.portal-card-compact h3{font-size:20px;margin:0 0 6px}
+.portal-card-compact.featured{border-color:#38bdf8;box-shadow:0 0 24px #38bdf822}
+.command-banner{background:linear-gradient(135deg,#052e16,#0f172a 55%,#172554);border:1px solid #22c55e55;border-radius:26px;padding:20px;margin-bottom:18px;box-shadow:0 18px 45px #0006}
+.command-banner h2{margin:0 0 8px;font-size:28px}
+.command-banner p{color:#cbd5e1;margin:0 0 10px}
+@media(max-width:950px){
+  .side{height:auto;position:relative}
+  .nav-group-body{display:block}
+  .focus-grid,.mini-steps{grid-template-columns:1fr}
+  .mission-money{font-size:48px}
+}
+
+
+/* Z2E 100% WOW FINAL LAYER */
+.side{background:linear-gradient(180deg,#010611,#050b16)!important;border-right:1px solid #0f253f!important}
+.side .logo{box-shadow:0 18px 55px #2563eb44}
+.side h1{font-size:24px}.side p{color:#7f8ca3}
+.side .nav button{opacity:.86}
+.side .nav button:hover,.side .nav button.active-nav{opacity:1}
+.main{padding:38px!important}
+.top{margin-bottom:28px!important}
+.top h2{font-size:40px!important;letter-spacing:-.03em}
+.mission-hero-final{
+  padding:46px!important;
+  margin-bottom:16px!important;
+  min-height:430px;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  border-color:#22c55e77!important;
+  background:
+    radial-gradient(circle at 15% 20%,#22c55e33,transparent 28%),
+    radial-gradient(circle at 80% 70%,#2563eb55,transparent 33%),
+    linear-gradient(135deg,#06101f,#0b1730 55%,#020617)!important;
+  box-shadow:0 28px 100px #000b,0 0 70px #22c55e24!important;
+}
+.mission-money{
+  font-size:92px!important;
+  letter-spacing:-.06em;
+  text-shadow:0 0 40px #22c55e33;
+  animation:z2eMoneyPulse 3.5s ease-in-out infinite;
+}
+@keyframes z2eMoneyPulse{
+  0%,100%{filter:drop-shadow(0 0 0 #22c55e00)}
+  50%{filter:drop-shadow(0 0 22px #22c55e55)}
+}
+.mission-hero-final .bar{height:16px!important;background:#1e293bcc!important;margin:18px 0!important}
+.mission-hero-final .fill{transition:width .9s ease;background:linear-gradient(90deg,#22c55e,#38bdf8,#fbbf24)!important}
+.mission-next{
+  font-size:30px!important;
+  font-weight:900;
+  color:#fff!important;
+  margin-top:18px!important;
+}
+.next-action-direct{
+  margin-top:18px;
+  padding:20px;
+  border-radius:24px;
+  border:1px solid #38bdf855;
+  background:#02061799;
+}
+.next-action-direct h3{margin:0 0 8px;font-size:24px}
+.next-action-direct p{margin:0;color:#cbd5e1}
+.primary-big{
+  font-size:21px!important;
+  padding:18px 30px!important;
+  min-width:230px;
+  animation:z2eCtaPulse 2.4s ease-in-out infinite;
+}
+@keyframes z2eCtaPulse{
+  0%,100%{box-shadow:0 0 20px #22c55e33}
+  50%{box-shadow:0 0 38px #22c55e88}
+}
+.focus-grid{margin-top:16px!important;align-items:stretch}
+.next-action-card,.priority-portal{min-height:220px}
+.mission-state-row{
+  display:flex;
+  gap:12px;
+  flex-wrap:wrap;
+  margin-top:18px;
+}
+.mission-state-card{
+  flex:1;
+  min-width:180px;
+  background:#02061788;
+  border:1px solid #334155;
+  border-radius:18px;
+  padding:14px 16px;
+}
+.mission-state-card b{display:block;color:#fff;font-size:15px}
+.mission-state-card span{color:#94a3b8;font-size:13px}
+.reward-toast{
+  font-size:16px!important;
+  border-radius:26px!important;
+  padding:20px 22px!important;
+  background:linear-gradient(135deg,#052e16,#064e3b)!important;
+  border-color:#22c55e!important;
+  box-shadow:0 24px 70px #000c,0 0 40px #22c55e55!important;
+}
+.reward-toast strong{display:block;font-size:20px;margin-bottom:4px;color:#fff}
+.collapsed-section{margin-top:14px!important}
+.portal-grid-compact{margin-top:18px}
+.portal-card-compact.featured{transform:translateY(-2px)}
+.mini-steps{margin-top:14px!important}
+.mini-step{background:linear-gradient(135deg,#0b1220,#0f172a)!important}
+.mission-wow-footer{
+  margin-top:16px;
+  padding:16px 18px;
+  border-radius:22px;
+  border:1px solid #334155;
+  background:#02061766;
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+}
+.mission-wow-footer .wow-chip{background:#0b1220}
+@media(max-width:950px){
+  .main{padding:18px!important}
+  .mission-hero-final{padding:26px!important;min-height:auto}
+  .mission-money{font-size:54px!important}
+  .mission-next{font-size:22px!important}
+}
+
+
+/* Z2E MICRO-INTERACTIONS FINAL */
+.mission-hero-final .mission-cta-row .secondary{
+  background:#122036!important;
+  color:#cbd5e1!important;
+  border:1px solid #334155!important;
+  transform:scale(.92);
+  opacity:.82;
+}
+.mission-hero-final .mission-cta-row .secondary:hover{
+  opacity:1;
+  transform:scale(.96);
+}
+.primary-big{
+  position:relative;
+  overflow:hidden;
+}
+.primary-big:after{
+  content:"";
+  position:absolute;
+  top:0;
+  left:-120%;
+  width:80%;
+  height:100%;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.28),transparent);
+  animation:z2eShine 2.8s ease-in-out infinite;
+}
+@keyframes z2eShine{
+  0%{left:-120%}
+  55%{left:130%}
+  100%{left:130%}
+}
+.urgency-line{
+  margin-top:14px;
+  color:#fde68a;
+  font-weight:800;
+  display:inline-flex;
+  gap:8px;
+  align-items:center;
+  padding:10px 14px;
+  border-radius:999px;
+  border:1px solid #fbbf2444;
+  background:#451a031f;
+}
+.progress-path{
+  margin-top:18px;
+  display:grid;
+  grid-template-columns:repeat(5,1fr);
+  gap:10px;
+}
+.progress-step{
+  position:relative;
+  padding:13px 12px;
+  border-radius:16px;
+  background:#02061799;
+  border:1px solid #334155;
+  color:#94a3b8;
+  min-height:72px;
+}
+.progress-step.done{
+  color:#dcfce7;
+  border-color:#22c55e88;
+  background:#052e1688;
+  box-shadow:0 0 22px #22c55e22;
+}
+.progress-step.active{
+  color:#e0f2fe;
+  border-color:#38bdf8;
+  background:#082f4988;
+  box-shadow:0 0 26px #38bdf833;
+}
+.progress-step.locked{
+  opacity:.55;
+}
+.progress-step b{
+  display:block;
+  font-size:13px;
+  margin-bottom:6px;
+}
+.progress-step span{
+  font-size:12px;
+}
+.money-count{
+  display:inline-block;
+}
+.fill.animated-fill{
+  width:0!important;
+  animation:z2eFill .9s ease forwards;
+}
+@keyframes z2eFill{
+  from{width:0}
+  to{width:var(--target-width)}
+}
+.action-complete-flash{
+  animation:z2eCompleteFlash .9s ease;
+}
+@keyframes z2eCompleteFlash{
+  0%{box-shadow:0 0 0 #22c55e00}
+  40%{box-shadow:0 0 55px #22c55e88}
+  100%{box-shadow:0 0 0 #22c55e00}
+}
+.portal-card-compact,.mini-step,.next-action-card,.priority-portal{
+  transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+}
+.portal-card-compact:hover,.mini-step:hover,.next-action-card:hover,.priority-portal:hover{
+  transform:translateY(-3px);
+  box-shadow:0 18px 45px #0007;
+  border-color:#38bdf866;
+}
+.success-ring{
+  animation:z2eRing 1.1s ease;
+}
+@keyframes z2eRing{
+  0%{outline:0 solid #22c55e00}
+  35%{outline:8px solid #22c55e33}
+  100%{outline:0 solid #22c55e00}
+}
+@media(max-width:950px){
+  .progress-path{grid-template-columns:1fr}
+  .mission-hero-final .mission-cta-row .secondary{transform:none}
+}
+
+
+/* Z2E TELEGRAM CONNECT UI */
+.telegram-connect-card{
+  background:linear-gradient(135deg,#06101f,#0f172a 55%,#172554);
+  border:1px solid #38bdf855;
+  box-shadow:0 20px 60px #0008,0 0 34px #38bdf822;
+  border-radius:28px;
+  padding:24px;
+  margin:18px 0;
+}
+.telegram-connect-card h2{font-size:30px;margin:0 0 8px}
+.telegram-steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px;margin:16px 0}
+.telegram-step{background:#02061799;border:1px solid #334155;border-radius:18px;padding:14px}
+.telegram-step b{display:block;margin-bottom:6px;color:#fff}
+.telegram-step span{font-size:13px;color:#94a3b8}
+.telegram-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+.telegram-result{margin-top:14px}
+.telegram-chat-option{border:1px solid #334155;background:#0f172a;border-radius:18px;padding:14px;margin:10px 0}
+.telegram-chat-option:hover{border-color:#38bdf8}
+.telegram-status-ok{color:#86efac;font-weight:900}
+.telegram-status-bad{color:#fca5a5;font-weight:900}
+
+
+/* Z2E RAZORPAY LIVE FLOW */
+.z2e-payment-card{background:linear-gradient(135deg,#06101f,#0f172a 55%,#172554);border:1px solid #22c55e66;border-radius:28px;padding:24px;margin:18px 0;box-shadow:0 24px 70px #0008,0 0 42px #22c55e22}
+.z2e-payment-card h2{font-size:30px;margin:0 0 8px}
+.z2e-payment-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px;margin:16px 0}
+.z2e-payment-feature{background:#02061799;border:1px solid #334155;border-radius:18px;padding:14px}
+.z2e-payment-feature b{display:block;color:#fff;margin-bottom:6px}
+.z2e-payment-feature span{font-size:13px;color:#94a3b8}
+.z2e-upgrade-sticky{position:fixed;right:22px;bottom:22px;z-index:9998;box-shadow:0 18px 55px #0009;border-radius:20px}
+.z2e-upgrade-sticky button{border-radius:20px!important;font-weight:900;padding:14px 18px!important}
+
+
+/* Z2E TELEGRAM ENGINE UI */
+.z2e-telegram-engine{background:linear-gradient(135deg,#06101f,#0f172a 55%,#172554);border:1px solid #38bdf866;border-radius:28px;padding:24px;margin:18px 0;box-shadow:0 24px 70px #0008,0 0 40px #38bdf822}
+.z2e-telegram-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin:16px 0}
+.z2e-telegram-box{background:#02061799;border:1px solid #334155;border-radius:18px;padding:14px}
+.z2e-telegram-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+.z2e-chat-option{background:#0f172a;border:1px solid #334155;border-radius:18px;padding:14px;margin:10px 0}
+
+
+/* Z2E TELEGRAM INTELLIGENCE UI */
+.z2e-intel-card{background:linear-gradient(135deg,#111827,#0f172a 55%,#312e81);border:1px solid #a78bfa66;border-radius:28px;padding:24px;margin:18px 0;box-shadow:0 24px 70px #0008,0 0 40px #a78bfa22}
+.z2e-intel-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px;margin:14px 0}
+.z2e-intel-box{background:#02061799;border:1px solid #334155;border-radius:18px;padding:14px}
+
+</style>
 </head>
 <body>
-
 <div class="app">
-  <aside class="sidebar">
-    <div class="brand">
-      <div class="brand-mark">Z</div>
-      <div>
-        <div class="logo">Zero<span>2Earn</span></div>
-        <div class="tagline">AI-powered earning OS</div>
+<aside class="side">
+  <div class="logo">Z</div><h1>Zero2Earn</h1><p>Universal Income OS</p>
+  <div class="nav nav-primary">
+    <div class="command-note">Mission-first command center. Full engines preserved, grouped for clarity.</div>
+    <button onclick="showPage('first100')">🚀 First ₹100 Mission</button>
+    <button onclick="showPage('daily500')">💰 Daily ₹500 Mode</button>
+    <button onclick="showPage('home')">🏠 Daily Command</button>
+    <button onclick="showPage('micro')">⚡ Micro Income</button>
+
+    <div class="nav-group open">
+      <button class="nav-group-title" onclick="toggleNavGroup(this)">⚡ Earn Engine <span>▾</span></button>
+      <div class="nav-group-body">
+        <button onclick="showPage('resume')">📄 Resume First</button>
+        <button onclick="showPage('jobs')">💼 Jobs Engine</button>
+        <button onclick="showPage('apply')">🚀 Apply Engine</button>
+        <button onclick="showPage('wingman')">🧠 Wingman</button>
       </div>
     </div>
 
-    <div class="nav">
-      <button id="nav-home" onclick="showPage('home')" class="active">Home</button>
-      <button id="nav-resume" onclick="showPage('resume')">Resume First</button>
-      <button id="nav-jobs" onclick="showPage('jobs')">Jobs</button>
-      <button id="nav-micro" onclick="showPage('micro')">Micro Jobs</button>
-      <button id="nav-automation" onclick="showPage('automation')">Automation</button>
-      <button id="nav-partners" onclick="showPage('partners')">Partners</button>
-      <button id="nav-pricing" onclick="showPage('pricing')">Plans</button>
-    </div>
-
-    <div class="sidebar-panel">
-      <b>Revenue Engine</b>
-      <p class="small muted">Users, colleges, companies, Pro plans.</p>
-      <span class="badge gold">Payments Live</span>
-    </div>
-  </aside>
-
-  <main class="main">
-    <div class="topbar">
-      <div class="title">
-        <span class="kicker">AI Career + Income Platform</span>
-        <h1 id="pageTitle">Home</h1>
-        <p id="pageSub">Your premium earning command center</p>
-      </div>
-
-      <div class="auth-card" id="loginBox">
-        <input id="emailInput" value="test@zero2earn.com">
-        <input id="passwordInput" type="password" value="1234">
-        <button onclick="login()">Login</button>
-        <div id="status" class="muted small"></div>
-      </div>
-
-      <div class="auth-card hidden" id="userBox">
-        <b id="userMini">Logged in</b><br>
-        <span class="muted small" id="proMini">Free plan</span><br><br>
-        <button class="soft" onclick="refresh()">Refresh</button>
-        <button class="secondary" onclick="logout()">Logout</button>
+    <div class="nav-group">
+      <button class="nav-group-title" onclick="toggleNavGroup(this)">📊 Proof & Money <span>▾</span></button>
+      <div class="nav-group-body">
+        <button onclick="showPage('tracker')">📊 Tracker</button>
+        <button onclick="showPage('earning')">💰 Income Dashboard</button>
       </div>
     </div>
 
-    <div id="content"></div>
+    <div class="nav-group">
+      <button class="nav-group-title" onclick="toggleNavGroup(this)">🧠 Growth Engine <span>▾</span></button>
+      <div class="nav-group-body">
+        <button onclick="showPage('execution')">🔥 Execution Streak</button>
+        <button onclick="showPage('skills')">🎓 Skill Engine</button>
+        <button onclick="showPage('booster')">🚀 Score Booster</button>
+      </div>
+    </div>
 
-    <footer>Zero2Earn AI — live SaaS career and earning operating system.</footer>
-  </main>
+    <div class="nav-group">
+      <button class="nav-group-title" onclick="toggleNavGroup(this)">🏢 Pro / Recruiter <span>▾</span></button>
+      <div class="nav-group-body">
+        <button onclick="showPage('talent')">👥 Talent Pool</button>
+        <button onclick="showPage('recruiter')">🏢 Recruiter Hiring</button>
+        <button onclick="showPage('plans')">💎 Plans</button>
+        <button onclick="showPage('plans'); setTimeout(()=>z2eInjectPaymentCard('plans'),400)">💳 Upgrade</button>
+      </div>
+    </div>
+  </div>
+</aside>
+<main class="main">
+  <div class="top">
+    <div><h2 id="pageTitle">Daily Command</h2><p id="pageSubtitle">Universal operating loop</p></div>
+    <div id="userBox" class="user hidden"><b id="userName">User</b><br><span id="userPlan">Plan: free</span><br><button class="secondary" onclick="logout()">Logout</button></div>
+  </div>
+  <div id="landingHero" class="hero">
+    <div>
+      <h1>Zero2Earn AI</h1>
+      <p>Universal income, job seeking, skill development, freelance work, recruiter visibility, college placement and company talent operating system.</p><span class="chip">APPLY ENGINE VERIFIED BUILD</span>
+      <span class="chip">India-first</span><span class="chip">Global remote</span><span class="chip">Freelance</span><span class="chip">Micro income</span><span class="chip">Recruiter ready</span><br><button class="green public-cta" onclick="showAuthTab('signup'); q('loginBox').scrollIntoView({behavior:'smooth'});">Create Free Account</button><button class="secondary public-cta" onclick="showAuthTab('login'); q('loginBox').scrollIntoView({behavior:'smooth'});">Login</button>
+    </div>
+    <div class="target"><span>Today’s target</span><h2 id="goal">₹500</h2><p class="small">Prepare · Apply · Track · Earn</p></div>
+  </div>
+  <section id="loginBox" class="panel login">
+    <h2>Start Zero2Earn</h2>
+    <p class="small">Login if you already have an account, or create a new account and start the First ₹100 mission.</p>
+
+    <div style="display:flex;gap:10px;margin-bottom:12px">
+      <button id="loginTabBtn" onclick="showAuthTab('login')" class="green">Login</button>
+      <button id="signupTabBtn" onclick="showAuthTab('signup')" class="secondary">Create Account</button>
+    </div>
+
+    <div id="loginTab">
+      <input id="email" value="demo@zero2earn.ai" placeholder="Email">
+      <input id="password" type="password" value="demo123" placeholder="Password">
+      <button onclick="login()">Login</button>
+      <p class="small">Demo: demo@zero2earn.ai / demo123</p>
+    </div>
+
+    <div id="signupTab" class="hidden">
+      <input id="signupName" placeholder="Full name">
+      <input id="signupEmail" placeholder="Email">
+      <input id="signupPassword" type="password" placeholder="Password">
+      <input id="signupGoal" type="number" value="500" placeholder="Daily earning target">
+      <button class="green" onclick="signup()">Create Account + Start</button>
+      <p class="small">No payment. Start with resume, jobs, micro tasks, proof and daily execution.</p>
+    </div>
+
+    <div id="authResult"></div>
+  </section>
+  <section id="home" class="page active"></section><section id="first100" class="page"></section><section id="daily500" class="page"></section><section id="resume" class="page"></section><section id="jobs" class="page"></section><section id="apply" class="page"></section><section id="wingman" class="page"></section><section id="micro" class="page"></section><section id="automation" class="page"></section><section id="execution" class="page"></section><section id="tracker" class="page"></section><section id="earning" class="page"></section><section id="skills" class="page"></section><section id="booster" class="page"></section><section id="talent" class="page"></section><section id="recruiter" class="page"></section><section id="plans" class="page"></section>
+</main>
 </div>
+<script>
+const API = window.location.origin;
+window.API = API; let userId = localStorage.getItem("z2e_user_id") || "";
+function q(id){ return document.getElementById(id); } function money(n){ return "₹" + Number(n || 0).toLocaleString("en-IN"); }
+function fd(obj){ const f = new FormData(); Object.keys(obj).forEach(k => f.append(k, obj[k])); return f; }
+function escapeHtml(s){ return String(s || "").replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m])); }
+async function get(path){ const r = await fetch(API + path); if(!r.ok) throw new Error(await r.text()); return await r.json(); }
+async function post(path, body){ const r = await fetch(API + path, {method:"POST", body}); if(!r.ok) throw new Error(await r.text()); return await r.json(); }
+function requireLogin(section){ if(!userId){ q(section).innerHTML = `<div class="panel">Please login first.</div>`; return false; } return true; }
+function bar(n){
+  const pct = Math.min(100,Number(n||0));
+  return `<div class="bar"><div class="fill animated-fill" style="--target-width:${pct}%;width:${pct}%"></div></div>`;
+}
 
-<script src="./script.js"></script>
+function setLoggedInUI(isLoggedIn){ document.body.classList.toggle('logged-in', !!isLoggedIn); }
+
+/* Z2E Command Center Final helpers - no feature loss */
+function toggleNavGroup(btn){
+  const group = btn.closest(".nav-group");
+  group.classList.toggle("open");
+}
+function highlightActiveNav(id){
+  document.querySelectorAll(".nav button").forEach(b => b.classList.remove("active-nav"));
+  document.querySelectorAll(".nav button").forEach(b => {
+    const on = b.getAttribute("onclick") || "";
+    if(on.includes("'" + id + "'")) b.classList.add("active-nav");
+  });
+}
+function z2eReward(message){
+  let box = document.getElementById("rewardToast");
+  if(!box){
+    box = document.createElement("div");
+    box.id = "rewardToast";
+    box.className = "reward-toast";
+    document.body.appendChild(box);
+  }
+  box.innerHTML = `<strong>🔥 Momentum Gained</strong>${escapeHtml(message || "You are closer to your earning goal.")}<br><span class="small">Keep going — 2 actions protect your streak.</span>`;
+  box.classList.add("show");
+  document.querySelectorAll(".mission-hero-final,.next-action-card").forEach(el => el.classList.add("action-complete-flash"));
+  setTimeout(()=>document.querySelectorAll(".action-complete-flash").forEach(el => el.classList.remove("action-complete-flash")), 1000);
+  setTimeout(()=>box.classList.remove("show"), 3600);
+}
+function commandBanner(title, subtitle, cta, page){
+  return `<div class="command-banner command-focus">
+    <h2>${title}</h2>
+    <p>${subtitle}</p>
+    <span class="wow-chip">One mission</span>
+    <span class="wow-chip">One next action</span>
+    <span class="wow-chip">Proof-driven</span>
+    ${page ? `<br><button class="green" onclick="showPage('${page}')">${cta || "Continue"}</button>` : ""}
+  </div>`;
+}
+function bestPortal(portals){
+  if(!portals || !portals.length) return null;
+  const priority = ["Toloka","Clickworker","UserTesting","OneForma","uTest"];
+  for(const name of priority){
+    const p = portals.find(x => String(x.name||"").toLowerCase().includes(name.toLowerCase()));
+    if(p) return p;
+  }
+  return portals[0];
+}
+
+
+function z2eAnimateMoney(){
+  document.querySelectorAll("[data-count-money]").forEach(el => {
+    const target = Number(el.getAttribute("data-count-money") || 0);
+    const prefix = el.getAttribute("data-prefix") || "₹";
+    const suffix = el.getAttribute("data-suffix") || "";
+    const start = 0;
+    const duration = 750;
+    const t0 = performance.now();
+    function tick(now){
+      const p = Math.min(1, (now - t0) / duration);
+      const val = Math.round(start + (target - start) * (1 - Math.pow(1-p, 3)));
+      el.innerText = prefix + val.toLocaleString("en-IN") + suffix;
+      if(p < 1) requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  });
+}
+function z2eAfterRender(){
+  setTimeout(z2eAnimateMoney, 40);
+  setTimeout(()=>document.querySelectorAll(".next-action-card,.priority-portal").forEach(el=>el.classList.add("success-ring")), 80);
+  setTimeout(()=>document.querySelectorAll(".success-ring").forEach(el=>el.classList.remove("success-ring")), 1200);
+}
+
+function showPage(id){
+  highlightActiveNav(id);
+  document.querySelectorAll(".page").forEach(p => p.classList.remove("active")); q(id).classList.add("active");
+  const names = {
+    home:["Daily Command","Universal operating loop for earning, jobs, skills and talent readiness"],
+    first100:["First ₹100 Mission","Guided first ₹100 proof flow with genuine earning portals"],
+    daily500:["Daily ₹500 Mode","Strict daily action loop for applications, micro tasks, follow-ups and proof"],
+    resume:["Resume First","Profile, ATS, keywords and recruiter readiness"],
+    jobs:["Jobs Engine","India-first, global, freelance and micro opportunity engine"],
+    apply:["Apply Engine","Open jobs, use proposals, mark applied and follow up"],
+    wingman:["Wingman","Proposal, cover letter and follow-up engine"],
+    micro:["Micro Income","Backup income sources and quick-start platforms"],
+    automation:["Automation","Daily queue, follow-ups and income actions"],
+    execution:["Execution Streak","Complete tasks, protect streak and improve activity score"],
+    tracker:["Tracker","Applications, income and progress"],
+    earning:["Income Dashboard","Daily target, proof tracker and monthly earning forecast"],
+    skills:["Skill Engine","Seven-day skill improvement and readiness plan"],
+    booster:["Score Booster","One-click resume, skill, proof and talent score upgrade"],
+    talent:["Talent Pool","Candidate readiness, score, proof and recruiter visibility"],
+    recruiter:["Recruiter Hiring","Job posting, match engine, auto-shortlist and contact requests"],
+    plans:["Plans","Free, Pro, College and Company growth model"]
+  };
+  q("pageTitle").innerText = names[id][0]; q("pageSubtitle").innerText = names[id][1];
+  if(id==="home") loadHome(); if(id==="first100") loadFirst100(); if(id==="daily500") loadDaily500(); if(id==="resume") loadResume(); if(id==="jobs") loadJobs(); if(id==="apply") loadApplyEngine(); if(id==="wingman") { loadWingman(); setTimeout(()=>showUpgradeIfNeeded("wingman"), 700); } if(id==="micro") loadMicro(); if(id==="automation") loadAutomation(); if(id==="execution") loadExecutionEngine(); if(id==="tracker") loadTracker(); if(id==="earning") loadEarningDashboard(); if(id==="skills") loadSkills(); if(id==="booster") loadBooster(); if(id==="talent") loadTalent(); if(id==="recruiter") loadRecruiter(); if(id==="plans") loadPlans(); setTimeout(z2eAfterRender, 100);
+}
+
+
+function showAuthTab(tab){
+  q("loginTab").classList.toggle("hidden", tab !== "login");
+  q("signupTab").classList.toggle("hidden", tab !== "signup");
+  q("loginTabBtn").className = tab === "login" ? "green" : "secondary";
+  q("signupTabBtn").className = tab === "signup" ? "green" : "secondary";
+  q("authResult").innerHTML = "";
+}
+
+async function signup(){
+  const name = q("signupName").value.trim();
+  const email = q("signupEmail").value.trim();
+  const password = q("signupPassword").value.trim();
+  const goal = q("signupGoal").value || 500;
+
+  if(!name || !email || !password){
+    q("authResult").innerHTML = `<div class="error">Please enter name, email and password.</div>`;
+    return;
+  }
+
+  try{
+    const d = await post("/api/signup", fd({
+      name:name,
+      email:email,
+      password:password,
+      goal_daily:goal
+    }));
+    userId = d.user_id;
+    localStorage.setItem("z2e_user_id", userId);
+    setLoggedInUI(true); q("loginBox").classList.add("hidden");
+    q("userBox").classList.remove("hidden"); setLoggedInUI(true);
+    q("userName").innerText = d.name;
+    q("userPlan").innerText = "Plan: " + d.plan;
+    if(typeof loadDaily500 === "function"){
+      showPage("first100");
+    }else{
+      showPage("home");
+    }
+  }catch(e){
+    q("authResult").innerHTML = `<div class="error">Signup failed: ${escapeHtml(e.message)}</div>`;
+  }
+}
+
+
+async function login(){
+  try{ const d = await post("/api/login", fd({email:q("email").value, password:q("password").value}));
+    userId = d.user_id; localStorage.setItem("z2e_user_id", userId); setLoggedInUI(true); q("loginBox").classList.add("hidden"); q("userBox").classList.remove("hidden"); setLoggedInUI(true); q("userName").innerText = d.name; q("userPlan").innerText = "Plan: " + d.plan; showPage("first100");
+  }catch(e){ q("loginBox").innerHTML += `<div class="error">Login failed: ${escapeHtml(e.message)}</div>`; }
+}
+function logout(){ localStorage.removeItem("z2e_user_id"); location.reload(); }
+
+
+async function loadDaily500(){
+  if(!requireLogin("daily500")) return;
+  q("daily500").innerHTML = `<div class="panel">Loading Daily ₹500 Mode...</div>`;
+  try{
+    const d = await get("/api/daily-500/" + userId);
+    const s = d.summary;
+    const req = s.requirements;
+    const reqCards = Object.keys(req).map(k => {
+      const r = req[k];
+      const pct = Math.min(100, Math.round((r.done / Math.max(1, r.target)) * 100));
+      return `<div class="card"><h3>${escapeHtml(r.label)}</h3><p>${r.done} / ${r.target}</p>${bar(pct)}<span class="chip">${pct}%</span></div>`;
+    }).join("");
+
+    q("daily500").innerHTML = `
+      <div class="panel glow">
+        <h2>Daily ₹500 Execution Mode</h2>
+        <p>Strict daily earning behavior loop: prepare, apply, micro task, follow up, and add proof.</p>
+        <span class="chip">Estimated today: ${money(s.estimated_value)} / ${money(s.target)}</span>
+        <span class="chip">Money progress: ${s.money_percent}%</span>
+        <span class="chip">Execution complete: ${s.completion_percent}%</span>
+        <span class="chip">Status: ${escapeHtml(s.status)}</span>
+      </div>
+      <div class="grid grid4">
+        <div class="metric"><span>Today Value</span><h3>${money(s.estimated_value)}</h3>${bar(s.money_percent)}</div>
+        <div class="metric"><span>Target</span><h3>${money(s.target)}</h3></div>
+        <div class="metric"><span>Execution</span><h3>${s.completion_percent}%</h3>${bar(s.completion_percent)}</div>
+        <div class="metric"><span>Next Action</span><h3 style="font-size:18px">${escapeHtml(s.next_action)}</h3></div>
+      </div>
+      <div class="panel"><h2>Daily Requirements</h2><div class="grid grid3">${reqCards}</div></div>
+      <div class="panel">
+        <h2>Do Actions Now</h2>
+        <button class="green" onclick="dailyPrepareJobs()">Prepare 5 Jobs Now</button>
+        <button onclick="showPage('apply')">Open Apply Engine</button>
+        <button onclick="showPage('micro')">Open Micro Income</button>
+        <button onclick="showPage('earning')">Add Proof</button>
+        <button class="secondary" onclick="dailyAction('micro_tasks')">+1 Micro Task Done</button>
+        <button class="secondary" onclick="dailyAction('followups_sent')">+1 Follow-up Sent</button>
+        <button class="warn" onclick="resetDaily500()">Reset Today</button>
+      </div>
+      <div class="grid grid2">
+        <div class="panel"><h3>Today’s Steps</h3>${d.steps.map(x => `<div class="card"><h3>${x.step}. ${escapeHtml(x.title)}</h3><p>${escapeHtml(x.why)}</p><button onclick="showPage('${x.route}')">${escapeHtml(x.button)}</button></div>`).join("")}</div>
+        <div class="panel"><h3>Rules</h3>${s.rules.map(r => `<p>🔒 ${escapeHtml(r)}</p>`).join("")}</div>
+      </div>
+      <div class="panel"><h3>Today’s Applications</h3>${d.apps_today.length ? d.apps_today.map(a => `<div class="card"><h3>${escapeHtml(a.title)}</h3><p>${escapeHtml(a.company)} · ${escapeHtml(a.status)} · ${a.score}%</p><a class="btn" target="_blank" href="${a.url}">Open</a></div>`).join("") : "<p>No applications tracked today yet.</p>"}</div>
+    `;
+  }catch(e){
+    q("daily500").innerHTML = `<div class="error">Daily ₹500 Mode failed: ${escapeHtml(e.message)}</div>`;
+  }
+}
+
+async function dailyAction(action){
+  try{
+    await post("/api/daily-500/action/" + userId, fd({action:action, amount:1}));
+    await loadDaily500();
+  }catch(e){ alert("Daily action failed: " + e.message); }
+}
+
+async function dailyPrepareJobs(){
+  try{
+    const d = await post("/api/daily-500/prepare-jobs/" + userId, fd({limit:5, min_score:65}));
+    alert("Prepared " + d.prepared + " jobs for today.");
+    await loadDaily500();
+  }catch(e){ alert("Prepare failed: " + e.message); }
+}
+
+async function resetDaily500(){
+  if(!confirm("Reset today's Daily ₹500 progress?")) return;
+  await post("/api/daily-500/reset-today/" + userId, fd({}));
+  await loadDaily500();
+}
+
+
+async function loadHome(){
+  if(!requireLogin("home")) return; q("home").innerHTML = `<div class="panel">Loading Daily Command...</div>`;
+  try{ const dash = await get("/api/dashboard/" + userId); const cmd = await get("/api/daily-command/" + userId);
+    q("userName").innerText = dash.user.name; q("userPlan").innerText = "Plan: " + dash.user.plan; q("goal").innerText = money(dash.metrics.today_target);
+    q("home").innerHTML = `
+      ${commandBanner('Mission Control', 'Start with First ₹100 Mission, then scale to Daily ₹500 Mode. Your full system is grouped in engines, not removed.', 'Open First ₹100 Mission', 'first100')}
+      <div class="panel glow"><h2>${cmd.title}</h2><p>${cmd.positioning}</p><span class="chip">${cmd.level}</span><span class="chip">Target: ${money(cmd.today_target)}</span><span class="chip">Talent Score: ${cmd.talent_score}%</span></div>
+      <div class="grid grid4"><div class="metric"><span>Total earned</span><h3>${money(dash.metrics.total_earned)}</h3></div><div class="metric"><span>Applications</span><h3>${dash.metrics.jobs_applied}</h3></div><div class="metric"><span>Replies</span><h3>${dash.metrics.replies}</h3></div><div class="metric"><span>Talent Score</span><h3>${dash.talent.talent_score}%</h3></div></div>
+      <div class="panel"><h2>Today’s Command Actions</h2><div class="grid grid3">${cmd.actions.map(a => `<div class="card"><span class="chip">Step ${a.step}</span><h3>${a.title}</h3><p>${a.description}</p><span class="chip">${a.impact}</span><br><button onclick="showPage('${a.route}')">Open</button></div>`).join("")}</div></div>
+      <div class="panel"><h2>Trust Rules</h2>${cmd.trust_rules.map(r => `<span class="chip">✅ ${r}</span>`).join("")}</div>
+      <div class="panel glow"><h2>🔥 Daily Execution</h2><p>Complete two tasks daily to protect streak, improve activity score, and build recruiter trust.</p><button class="green" onclick="showPage('execution')">Open Execution Streak</button></div>`;
+  }catch(e){ q("home").innerHTML = `<div class="error">Failed to load Home: ${escapeHtml(e.message)}</div>`; }
+}
+
+async function loadResume(){
+  if(!requireLogin("resume")) return;
+  try{ const s = await get("/api/resume/status/" + userId);
+    q("resume").innerHTML = `<div class="panel glow"><h2>Resume First Engine</h2><p>Build profile strength, ATS keywords and recruiter trust.</p><span class="chip">Resume score: ${s.resume_score}%</span><span class="chip">${s.uploaded ? "Resume uploaded" : "No resume uploaded yet"}</span></div>
+    <div class="grid grid2">
+      <div class="panel">
+        <h3>Upload Resume File</h3>
+        <p class="small">Best: upload .txt resume. PDF/DOCX may upload but text extraction is basic in this local build.</p>
+        <input id="resumeFile" type="file" accept=".txt,.pdf,.doc,.docx">
+        <button onclick="uploadResume()">Upload + Analyze</button>
+        <hr style="border-color:#1e293b">
+        <h3>Or Paste Resume Text</h3>
+        <textarea id="resumeText" placeholder="Paste resume text here"></textarea>
+        <button onclick="pasteResume()">Analyze Resume</button>
+        <button class="secondary" onclick="optimizeResume()">Optimize Resume</button>
+        <button class="green" onclick="showPage('booster')">Open Score Booster</button>
+        <div id="resumeResult"></div>
+      </div>
+      <div class="panel">
+        <h3>Current Profile</h3>
+        <p><b>Headline:</b> ${escapeHtml(s.headline)}</p>
+        <p><b>Summary:</b> ${escapeHtml(s.summary)}</p>
+        <h4>Skills</h4>${s.skills.map(x => `<span class="chip">${escapeHtml(x)}</span>`).join("") || "<p>No skills yet.</p>"}
+        <h4>Missing Keywords</h4>${s.missing_keywords.map(x => `<span class="chip">${escapeHtml(x)}</span>`).join("")}
+      </div>
+    </div>`;
+  }catch(e){ q("resume").innerHTML = `<div class="error">Resume failed: ${escapeHtml(e.message)}</div>`; }
+}
+
+async function uploadResume(){
+  const fileInput = q("resumeFile");
+  if(!fileInput.files || !fileInput.files[0]){
+    q("resumeResult").innerHTML = `<div class="error">Please select a resume file first.</div>`;
+    return;
+  }
+  const f = new FormData();
+  f.append("file", fileInput.files[0]);
+  try{
+    const d = await post("/api/resume/upload/" + userId, f);
+    q("resumeResult").innerHTML = `<div class="success">Resume uploaded. Score: ${d.resume_score}%. Skills: ${d.skills.join(", ")}</div>`;
+  }catch(e){
+    q("resumeResult").innerHTML = `<div class="error">Upload failed: ${escapeHtml(e.message)}</div>`;
+  }
+}
+
+async function pasteResume(){ const d = await post("/api/resume/paste/" + userId, fd({text:q("resumeText").value})); q("resumeResult").innerHTML = `<div class="success">Resume saved. Score: ${d.resume_score}%. Talent pool updated.</div>`; }
+async function optimizeResume(){ const d = await post("/api/resume/optimize/" + userId, fd({})); q("resumeResult").innerHTML = `<div class="success"><h3>${d.optimized_headline}</h3><p>${d.optimized_summary}</p>${d.recommended_bullets.map(x => `<p>✅ ${x}</p>`).join("")}</div>`; }
+
+let allJobsCache = [];
+
+async function loadJobs(){
+  if(!requireLogin("jobs")) return; q("jobs").innerHTML = `<div class="panel">Loading jobs...</div>`;
+  try{
+    const d = await get("/api/jobs/" + userId);
+    allJobsCache = d.items || [];
+    q("jobs").innerHTML = `
+      <div class="panel glow">
+        <h2>Jobs Engine</h2>
+        <p>Search, filter and shortlist India-first, global remote, freelance and micro opportunity sources.</p>
+        <span class="chip">Total opportunities: ${allJobsCache.length}</span>
+        <span class="chip">Safety: Never pay to apply</span>
+      </div>
+      <div class="panel">
+        <h3>Job Search Filters</h3>
+        <div class="grid grid4">
+          <input id="jobSearchText" placeholder="Search title, company, keyword">
+          <select id="jobCategoryFilter">
+            <option value="">All categories</option>
+            <option value="India-first job">India-first jobs</option>
+            <option value="Global remote / freelance">Global remote / freelance</option>
+            <option value="Micro income">Micro income</option>
+          </select>
+          <select id="jobSourceFilter">
+            <option value="">All sources</option>
+            ${[...new Set(allJobsCache.map(j => j.source || j.company).filter(Boolean))].sort().map(s => `<option value="${escapeHtml(s)}">${escapeHtml(s)}</option>`).join("")}
+          </select>
+          <select id="jobScoreFilter">
+            <option value="0">Any score</option><option value="50">50%+</option><option value="65">65%+</option><option value="75">75%+</option><option value="85">85%+</option>
+          </select>
+        </div>
+        <div class="grid grid4">
+          <input id="jobLocationFilter" placeholder="Location: India, Remote, Global">
+          <select id="jobDifficultyFilter"><option value="">Any difficulty</option><option value="Easy">Easy</option><option value="Medium">Medium</option><option value="Easy-Medium">Easy-Medium</option></select>
+          <button onclick="applyJobFilters()">Apply Filters</button>
+          <button class="secondary" onclick="resetJobFilters()">Reset</button>
+        </div>
+        <button class="green" onclick="prepareTopJobs()">🔥 Prepare Top 10</button>
+        <div id="jobFilterStats" class="small"></div>
+      </div>
+      <div id="jobList" class="jobs"></div>
+    `;
+    renderJobs(allJobsCache);
+  }catch(e){ q("jobs").innerHTML = `<div class="error">Jobs failed: ${escapeHtml(e.message)}</div>`; }
+}
+
+function renderJobs(items){
+  q("jobFilterStats").innerHTML = `Showing ${items.length} opportunities`;
+  q("jobList").innerHTML = items.map(j => `
+    <div class="card">
+      <div class="score">${j.score}%</div>
+      <h3>${escapeHtml(j.title)}</h3>
+      <p>${escapeHtml(j.company)} · ${escapeHtml(j.location)}</p>
+      <span class="chip">${escapeHtml(j.category)}</span><span class="chip">${escapeHtml(j.expected_earning)}</span><span class="chip">${escapeHtml(j.difficulty || "Medium")}</span>
+      <p>${escapeHtml(j.description)}</p>
+      <div>${(j.match_reason || []).map(r => `<span class="chip">🎯 ${escapeHtml(r)}</span>`).join("")}</div>
+      <p class="small">🔒 ${escapeHtml(j.safety_note)}</p>
+      <a class="btn" target="_blank" href="${j.url}">Open Portal</a>
+      <button onclick='openWingmanFromJob(${JSON.stringify(j).replace(/'/g,"&#039;")})'>Wingman</button>
+      <button class="green" onclick='saveJob(${JSON.stringify(j).replace(/'/g,"&#039;")})'>Save</button>
+      <details class="details"><summary>Proposal</summary><textarea>${escapeHtml(j.proposal)}</textarea></details>
+      <details class="details"><summary>Cover Letter</summary><textarea>${escapeHtml(j.cover_letter)}</textarea></details>
+    </div>
+  `).join("") || `<div class="panel">No jobs found. Try resetting filters or use broader keywords.</div>`;
+}
+
+function applyJobFilters(){
+  const text = (q("jobSearchText").value || "").toLowerCase();
+  const cat = q("jobCategoryFilter").value;
+  const source = q("jobSourceFilter").value;
+  const minScore = Number(q("jobScoreFilter").value || 0);
+  const loc = (q("jobLocationFilter").value || "").toLowerCase();
+  const diff = q("jobDifficultyFilter").value;
+  const filtered = allJobsCache.filter(j => {
+    const hay = `${j.title} ${j.company} ${j.source} ${j.category} ${j.description} ${(j.match_reason||[]).join(" ")}`.toLowerCase();
+    if(text && !hay.includes(text)) return false;
+    if(cat && j.category !== cat) return false;
+    if(source && (j.source || j.company) !== source) return false;
+    if(minScore && Number(j.score || 0) < minScore) return false;
+    if(loc && !String(j.location || "").toLowerCase().includes(loc)) return false;
+    if(diff && String(j.difficulty || "").indexOf(diff) === -1) return false;
+    return true;
+  });
+  renderJobs(filtered);
+}
+
+function resetJobFilters(){
+  q("jobSearchText").value = ""; q("jobCategoryFilter").value = ""; q("jobSourceFilter").value = ""; q("jobScoreFilter").value = "0"; q("jobLocationFilter").value = ""; q("jobDifficultyFilter").value = "";
+  renderJobs(allJobsCache);
+}
+
+async function prepareTopJobs(){
+  const top = [...allJobsCache].sort((a,b)=>b.score-a.score).slice(0,10);
+  for(const j of top){
+    await post("/api/wingman/save-application/" + userId, fd({job_id:j.id,title:j.title,company:j.company,url:j.url,score:j.score,proposal:j.proposal,cover_letter:j.cover_letter}));
+  }
+  alert("Top 10 jobs prepared and saved to Tracker. Talent score activity should improve.");
+}
+
+function openWingmanFromJob(j){
+  window.currentWingmanJob = j; showPage("wingman"); q("wingman").innerHTML = `<div class="panel glow"><h2>Wingman for ${escapeHtml(j.title)}</h2><p>${escapeHtml(j.company)} · ${escapeHtml(j.category)}</p><span class="chip">${j.score}% match</span><p>${escapeHtml(j.description)}</p></div><div class="grid grid2"><div class="panel"><h3>Proposal</h3><textarea>${escapeHtml(j.proposal)}</textarea></div><div class="panel"><h3>Cover Letter</h3><textarea>${escapeHtml(j.cover_letter)}</textarea></div></div><a class="btn" target="_blank" href="${j.url}">Apply on Portal</a><button class="green" onclick="saveJob(window.currentWingmanJob)">Save to Tracker</button>`; }
+async function saveJob(j){
+  try{
+    if(!j){ alert("No job data found to save."); return; }
+    const d = await post("/api/wingman/save-application/" + userId, fd({
+      job_id:j.id || "",
+      title:j.title || "Untitled role",
+      company:j.company || "Unknown company",
+      url:j.url || "#",
+      score:j.score || 0,
+      proposal:j.proposal || "",
+      cover_letter:j.cover_letter || ""
+    }));
+    alert(d.message || "Saved to tracker");
+    if(document.querySelector("#apply.active")){
+      await loadApplyEngine();
+    }
+  }catch(e){
+    alert("Save to tracker failed: " + e.message);
+  }
+}
+
+function openApplyProposal(j){
+  q("apply").innerHTML = `
+    <div class="panel glow">
+      <h2>Apply Proposal: ${escapeHtml(j.title)}</h2>
+      <p>${escapeHtml(j.company)} · ${escapeHtml(j.location)}</p>
+      <a class="btn" target="_blank" href="${j.url}">Open Official Portal</a>
+      <button class="secondary" onclick="loadApplyEngine()">Back to Apply Engine</button>
+    </div>
+    <div class="grid grid2">
+      <div class="panel"><h3>Proposal</h3><textarea>${escapeHtml(j.proposal)}</textarea></div>
+      <div class="panel"><h3>Cover Letter</h3><textarea>${escapeHtml(j.cover_letter)}</textarea></div>
+    </div>
+    <div class="panel"><h3>Apply Steps</h3>${j.apply_steps.map(s => `<p>✅ ${escapeHtml(s)}</p>`).join("")}</div>
+  `;
+}
+
+async function prepareApplyQueue(){
+  try{
+    const d = await post("/api/apply-engine/prepare/" + userId, fd({
+      min_score:q("applyMinScore").value,
+      limit:q("applyLimit").value
+    }));
+    q("applyQueueResult").innerHTML = `<div class="success">Prepared ${d.count} applications.</div>`;
+    await loadApplyEngine();
+  }catch(e){
+    q("applyQueueResult").innerHTML = `<div class="error">Prepare failed: ${escapeHtml(e.message)}</div>`;
+  }
+}
+
+async function markApplied(id){
+  try{
+    const d = await post("/api/apply-engine/mark-applied/" + id, fd({}));
+    alert("Marked applied. Follow-up due: " + d.follow_up_due);
+    await loadApplyEngine();
+  }catch(e){ alert("Mark applied failed: " + e.message); }
+}
+
+async function updateApplyStatus(id, status){
+  try{
+    await post("/api/apply-engine/status/" + id, fd({status:status, note:"Updated from Apply Engine", income_value:0}));
+    await loadApplyEngine();
+  }catch(e){ alert("Status update failed: " + e.message); }
+}
+
+async function markHired(id){
+  const value = prompt("Income value / salary proof amount?", "5000") || "0";
+  try{
+    await post("/api/apply-engine/status/" + id, fd({status:"hired", note:"Marked hired from Apply Engine", income_value:value}));
+    await loadApplyEngine();
+  }catch(e){ alert("Hired update failed: " + e.message); }
+}
+
+async function markFollowupDone(id){
+  try{
+    await post("/api/apply-engine/followup/" + id + "/done", fd({}));
+    await loadApplyEngine();
+  }catch(e){ alert("Follow-up update failed: " + e.message); }
+}
+
+
+
+async function loadApplyEngine(){
+  if(!requireLogin("apply")) return;
+  q("apply").innerHTML = `<div class="panel">Loading Apply Engine...</div>`;
+  try{
+    const plan = await get("/api/apply-engine/plan/" + userId + "?min_score=65&limit=10");
+    const tracker = await get("/api/apply-engine/tracker/" + userId);
+    q("apply").innerHTML = `
+      <div class="panel glow">
+        <h2>Real Apply Engine</h2>
+        <p>Open official portals, use job-specific proposals, mark applied, and follow up after 3–5 days.</p>
+        <span class="chip">Recommended: ${plan.count}</span>
+        <span class="chip">Tracked: ${tracker.metrics.total}</span>
+        <span class="chip">Applied: ${tracker.metrics.applied}</span>
+        <span class="chip">Due Follow-ups: ${tracker.metrics.due_followups}</span>
+      </div>
+
+      <div class="panel">
+        <h3>Safety Rules</h3>
+        ${plan.safety_rules.map(r => `<span class="chip">🔒 ${escapeHtml(r)}</span>`).join("")}
+      </div>
+
+      <div class="grid grid2">
+        <div class="panel">
+          <h3>Prepare Apply Queue</h3>
+          <select id="applyMinScore">
+            <option value="65">65%+ strong/review</option>
+            <option value="75">75%+ best matches</option>
+            <option value="85">85%+ highest priority</option>
+          </select>
+          <input id="applyLimit" type="number" value="10" placeholder="How many jobs">
+          <button class="green" onclick="prepareApplyQueue()">Prepare Queue</button>
+          <div id="applyQueueResult"></div>
+        </div>
+
+        <div class="panel">
+          <h3>Apply Metrics</h3>
+          <p>Prepared: ${tracker.counts.prepared || 0}</p>
+          <p>Saved: ${tracker.counts.saved || 0}</p>
+          <p>Applied: ${tracker.counts.applied || 0}</p>
+          <p>Followed up: ${tracker.counts.followed_up || 0}</p>
+          <p>Replies: ${tracker.metrics.replies}</p>
+          <p>Interviews: ${tracker.metrics.interviews}</p>
+          <p>Hired: ${tracker.metrics.hired}</p>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>Recommended Jobs to Apply</h2>
+        <div class="jobs">
+          ${plan.items.map(j => `
+            <div class="card">
+              <div class="score">${j.score}%</div>
+              <h3>${escapeHtml(j.title)}</h3>
+              <p>${escapeHtml(j.company)} · ${escapeHtml(j.location)}</p>
+              <span class="chip">${escapeHtml(j.apply_decision)}</span>
+              <span class="chip">${escapeHtml(j.expected_earning)}</span>
+              <p>${escapeHtml(j.description)}</p>
+              <a class="btn" target="_blank" href="${j.url}">1. Open Official Portal</a>
+              <button onclick='openApplyProposal(${JSON.stringify(j).replace(/'/g,"&#039;")})'>2. View Proposal</button>
+              <button class="green" onclick='saveJob(${JSON.stringify(j).replace(/'/g,"&#039;")})'>Save to Tracker</button>
+              <details class="details"><summary>Apply Steps</summary>${j.apply_steps.map(s => `<p>✅ ${escapeHtml(s)}</p>`).join("")}</details>
+            </div>
+          `).join("")}
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>Prepared / Applied Tracker</h2>
+        ${tracker.applications.length ? tracker.applications.map(a => `
+          <div class="card">
+            <h3>${escapeHtml(a.title)}</h3>
+            <p>${escapeHtml(a.company)} · Score ${a.score}% · Status: ${escapeHtml(a.status)}</p>
+            <span class="chip">Follow-up due: ${escapeHtml(a.follow_up_due || "Not set")}</span>
+            <br>
+            <a class="btn" target="_blank" href="${a.url}">Open Portal</a>
+            ${a.status === "prepared" || a.status === "saved" ? `<button class="green" onclick="markApplied(${a.id})">Mark Applied</button>` : ""}
+            <button onclick="updateApplyStatus(${a.id}, 'reply')">Got Reply</button>
+            <button onclick="updateApplyStatus(${a.id}, 'interview')">Interview</button>
+            <button onclick="markHired(${a.id})">Hired</button>
+            <details class="details"><summary>Proposal</summary><textarea>${escapeHtml(a.proposal)}</textarea></details>
+            <details class="details"><summary>Cover Letter</summary><textarea>${escapeHtml(a.cover_letter)}</textarea></details>
+          </div>
+        `).join("") : "<p>No prepared applications yet. Click Prepare Queue.</p>"}
+      </div>
+
+      <div class="panel">
+        <h2>Follow-up Queue</h2>
+        ${tracker.followups.length ? tracker.followups.map(f => `
+          <div class="card">
+            <h3>${escapeHtml(f.title)}</h3>
+            <p>${escapeHtml(f.company)} · Due: ${escapeHtml(f.due_date)} · ${escapeHtml(f.status)}</p>
+            <textarea>${escapeHtml(f.message)}</textarea>
+            ${f.status === "pending" ? `<button class="green" onclick="markFollowupDone(${f.id})">Mark Follow-up Sent</button>` : ""}
+          </div>
+        `).join("") : "<p>No follow-ups yet.</p>"}
+      </div>
+    `;
+  }catch(e){
+    q("apply").innerHTML = `<div class="error">Apply Engine failed: ${escapeHtml(e.message)}</div>`;
+  }
+}
+
+function openApplyProposal(j){
+  q("apply").innerHTML = `
+    <div class="panel glow">
+      <h2>Apply Proposal: ${escapeHtml(j.title)}</h2>
+      <p>${escapeHtml(j.company)} · ${escapeHtml(j.location)}</p>
+      <a class="btn" target="_blank" href="${j.url}">Open Official Portal</a>
+      <button class="secondary" onclick="loadApplyEngine()">Back to Apply Engine</button>
+    </div>
+    <div class="grid grid2">
+      <div class="panel"><h3>Proposal</h3><textarea>${escapeHtml(j.proposal)}</textarea></div>
+      <div class="panel"><h3>Cover Letter</h3><textarea>${escapeHtml(j.cover_letter)}</textarea></div>
+    </div>
+    <div class="panel"><h3>Apply Steps</h3>${j.apply_steps.map(s => `<p>✅ ${escapeHtml(s)}</p>`).join("")}</div>
+  `;
+}
+
+async function prepareApplyQueue(){
+  try{
+    const d = await post("/api/apply-engine/prepare/" + userId, fd({
+      min_score:q("applyMinScore").value,
+      limit:q("applyLimit").value
+    }));
+    q("applyQueueResult").innerHTML = `<div class="success">Prepared ${d.count} applications.</div>`;
+    await loadApplyEngine();
+  }catch(e){
+    q("applyQueueResult").innerHTML = `<div class="error">Prepare failed: ${escapeHtml(e.message)}</div>`;
+  }
+}
+
+async function markApplied(id){
+  try{
+    const d = await post("/api/apply-engine/mark-applied/" + id, fd({}));
+    alert("Marked applied. Follow-up due: " + d.follow_up_due);
+    await loadApplyEngine();
+  }catch(e){ alert("Mark applied failed: " + e.message); }
+}
+
+async function updateApplyStatus(id, status){
+  try{
+    await post("/api/apply-engine/status/" + id, fd({status:status, note:"Updated from Apply Engine", income_value:0}));
+    await loadApplyEngine();
+  }catch(e){ alert("Status update failed: " + e.message); }
+}
+
+async function markHired(id){
+  const value = prompt("Income value / salary proof amount?", "5000") || "0";
+  try{
+    await post("/api/apply-engine/status/" + id, fd({status:"hired", note:"Marked hired from Apply Engine", income_value:value}));
+    await loadApplyEngine();
+  }catch(e){ alert("Hired update failed: " + e.message); }
+}
+
+async function markFollowupDone(id){
+  try{
+    await post("/api/apply-engine/followup/" + id + "/done", fd({}));
+    await loadApplyEngine();
+  }catch(e){ alert("Follow-up update failed: " + e.message); }
+}
+
+
+async function loadWingman(){
+  if(!requireLogin("wingman")) return;
+  q("wingman").innerHTML = `
+    <div class="panel glow">
+      <h2>Groq AI Wingman V2</h2>
+      <p>Recruiter-grade proposal, cover letter, follow-up and interview pitch using your resume + full job description.</p>
+      <span class="chip">Groq / Llama</span>
+      <span class="chip">Full JD required</span>
+      <span class="chip">Integer scoring</span>
+    </div>
+
+    <div class="grid grid2">
+      <div class="panel">
+        <h3>Job Details</h3>
+        <input id="groqJobTitle" placeholder="Job title">
+        <input id="groqCompany" placeholder="Company">
+        <input id="groqJobUrl" placeholder="Job URL">
+        <input id="groqSalary" placeholder="Salary/pay if known">
+        <select id="groqTone">
+          <option value="professional">Professional</option>
+          <option value="confident">Confident</option>
+          <option value="warm">Warm</option>
+          <option value="concise">Concise</option>
+        </select>
+        <textarea id="groqJobDescription" placeholder="Paste full job description with responsibilities and requirements here"></textarea>
+        <button class="green" onclick="generateGroqWingman()">Generate with Groq Wingman</button>
+        <button class="secondary" onclick="fillGroqSample()">Use Strong Sample Healthcare Job</button>
+        <div id="groqWingmanStatus"></div>
+      </div>
+
+      <div class="panel">
+        <h3>Wingman V2 Rules</h3>
+        <p>✅ Requires full job description</p>
+        <p>✅ Uses saved resume/profile</p>
+        <p>✅ Gives 0–100 match score</p>
+        <p>✅ Gives proposal + cover letter + follow-up</p>
+        <p>✅ Saves output to tracker</p>
+        <p class="small">If Groq key is missing, fallback templates still work.</p>
+      </div>
+    </div>
+
+    <div id="groqWingmanResult"></div>
+  `;
+}
+
+function fillGroqSample(){
+  q("groqJobTitle").value = "Healthcare AI Content Reviewer";
+  q("groqCompany").value = "Remote Health AI Team";
+  q("groqJobUrl").value = "https://example.com/healthcare-ai-reviewer";
+  q("groqSalary").value = "₹30,000-₹90,000/month";
+  q("groqJobDescription").value = `We are hiring a Healthcare AI Content Reviewer.
+
+Responsibilities:
+- Review AI-generated medical content for clinical accuracy and patient safety.
+- Identify unsafe, outdated, misleading, or unclear medical responses.
+- Improve clarity, readability, and patient-friendly communication.
+- Provide structured feedback to improve AI healthcare outputs.
+- Work remotely and deliver reviews on time.
+
+Requirements:
+- Medical background such as MBBS, nursing, pharmacy, public health, or allied health.
+- Experience in clinical practice, medical writing, patient education, or healthcare consulting.
+- Strong understanding of medical terminology and safe patient communication.
+- Ability to use AI tools and review content carefully.
+
+Nice to have:
+- Remote work experience.
+- Medical content editing experience.
+- Clinical research or healthcare documentation experience.`;
+}
+
+async function generateGroqWingman(){
+  const jd = q("groqJobDescription").value.trim();
+  if(jd.length < 80){
+    alert("Paste full job description first. Add responsibilities and requirements.");
+    return;
+  }
+
+  q("groqWingmanStatus").innerHTML = `<div class="panel">Groq Wingman is generating recruiter-grade output...</div>`;
+  q("groqWingmanResult").innerHTML = "";
+
+  try{
+    const d = await post("/api/wingman/groq-generate/" + userId, fd({
+      title:q("groqJobTitle").value,
+      company:q("groqCompany").value,
+      url:q("groqJobUrl").value,
+      salary:q("groqSalary").value,
+      tone:q("groqTone").value,
+      description:jd
+    }));
+
+    window.lastGroqWingman = d;
+
+    q("groqWingmanStatus").innerHTML = `<div class="success">Generated in ${escapeHtml(d.mode || "unknown")} mode.</div>`;
+    q("groqWingmanResult").innerHTML = `
+      <div class="panel glow">
+        <h2>Wingman Result</h2>
+        <span class="chip">Match: ${Number(d.match_score || 0)}%</span>
+        <span class="chip">Win Chance: ${Number(d.win_chance || 0)}%</span>
+        <span class="chip">Mode: ${escapeHtml(d.mode || "")}</span>
+      </div>
+
+      <div class="grid grid2">
+        <div class="panel">
+          <h3>Matched Skills</h3>
+          ${(d.matched_skills || []).map(x => `<span class="chip">${escapeHtml(x)}</span>`).join("") || "<p>No skills returned.</p>"}
+          <h3>Match Reasons</h3>
+          ${(d.match_reasons || []).map(x => `<p>✅ ${escapeHtml(x)}</p>`).join("") || "<p>No reasons returned.</p>"}
+        </div>
+        <div class="panel">
+          <h3>Missing Skills / Warnings</h3>
+          ${(d.missing_skills || []).map(x => `<p>⚠️ ${escapeHtml(x)}</p>`).join("") || "<p>No major gaps returned.</p>"}
+          ${(d.warnings || []).map(x => `<p class="small">🔒 ${escapeHtml(x)}</p>`).join("")}
+        </div>
+      </div>
+
+      <div class="panel">
+        <h3>Proposal</h3>
+        <textarea id="groqProposalText">${escapeHtml(d.proposal || "")}</textarea>
+        <button onclick="copyText('groqProposalText')">Copy Proposal</button>
+      </div>
+
+      <div class="panel">
+        <h3>Cover Letter</h3>
+        <textarea id="groqCoverText">${escapeHtml(d.cover_letter || "")}</textarea>
+        <button onclick="copyText('groqCoverText')">Copy Cover Letter</button>
+      </div>
+
+      <div class="grid grid2">
+        <div class="panel">
+          <h3>Follow-up</h3>
+          <textarea id="groqFollowText">${escapeHtml(d.follow_up || "")}</textarea>
+          <button onclick="copyText('groqFollowText')">Copy Follow-up</button>
+        </div>
+        <div class="panel">
+          <h3>Interview Pitch</h3>
+          <textarea id="groqPitchText">${escapeHtml(d.interview_pitch || "")}</textarea>
+          <button onclick="copyText('groqPitchText')">Copy Pitch</button>
+        </div>
+      </div>
+
+      <div class="panel">
+        <button class="green" onclick="saveGroqWingman()">Save to Tracker</button>
+        <a class="btn" target="_blank" href="${escapeHtml(q("groqJobUrl").value || "#")}">Open Job Portal</a>
+      </div>
+    `;
+  }catch(e){
+    q("groqWingmanStatus").innerHTML = `<div class="error">Groq Wingman failed: ${escapeHtml(e.message)}</div>`;
+  }
+}
+
+async function saveGroqWingman(){
+  if(!window.lastGroqWingman){
+    alert("Generate Wingman output first.");
+    return;
+  }
+  try{
+    const d = window.lastGroqWingman;
+    const res = await post("/api/wingman/groq-save/" + userId, fd({
+      job_id:"groq-" + Date.now(),
+      title:q("groqJobTitle").value,
+      company:q("groqCompany").value,
+      url:q("groqJobUrl").value,
+      score:d.match_score || 0,
+      proposal:q("groqProposalText").value,
+      cover_letter:q("groqCoverText").value,
+      follow_up:q("groqFollowText").value
+    }));
+    alert(res.message || "Saved to tracker");
+  }catch(e){
+    alert("Save failed: " + e.message);
+  }
+}
+
+function copyText(id){
+  const el = q(id);
+  el.select();
+  el.setSelectionRange(0, 99999);
+  document.execCommand("copy");
+  alert("Copied");
+}
+
+function fillGroqSample(){
+  q("groqJobTitle").value = "Healthcare AI Content Reviewer";
+  q("groqCompany").value = "Remote Health AI Team";
+  q("groqJobUrl").value = "https://example.com/healthcare-ai-reviewer";
+  q("groqSalary").value = "₹30,000-₹90,000/month";
+  q("groqJobDescription").value = "Review AI-generated medical content for accuracy, safety, clarity, and patient-friendly communication. Clinical care, medical writing, research, and AI tools are preferred.";
+}
+
+async function generateGroqWingman(){
+  q("groqWingmanStatus").innerHTML = `<div class="panel">Groq Wingman is generating...</div>`;
+  q("groqWingmanResult").innerHTML = "";
+  try{
+    const d = await post("/api/wingman/groq-generate/" + userId, fd({
+      title:q("groqJobTitle").value,
+      company:q("groqCompany").value,
+      url:q("groqJobUrl").value,
+      salary:q("groqSalary").value,
+      tone:q("groqTone").value,
+      description:q("groqJobDescription").value
+    }));
+
+    window.lastGroqWingman = d;
+
+    q("groqWingmanStatus").innerHTML = `<div class="success">Generated in ${escapeHtml(d.mode || "unknown")} mode.</div>`;
+    q("groqWingmanResult").innerHTML = `
+      <div class="panel glow">
+        <h2>Wingman Result</h2>
+        <span class="chip">Match: ${d.match_score || 0}%</span>
+        <span class="chip">Win Chance: ${d.win_chance || 0}%</span>
+        <span class="chip">Mode: ${escapeHtml(d.mode || "")}</span>
+      </div>
+
+      <div class="grid grid2">
+        <div class="panel">
+          <h3>Matched Skills</h3>
+          ${(d.matched_skills || []).map(x => `<span class="chip">${escapeHtml(x)}</span>`).join("") || "<p>No skills returned.</p>"}
+          <h3>Match Reasons</h3>
+          ${(d.match_reasons || []).map(x => `<p>✅ ${escapeHtml(x)}</p>`).join("") || "<p>No reasons returned.</p>"}
+        </div>
+        <div class="panel">
+          <h3>Missing Skills / Warnings</h3>
+          ${(d.missing_skills || []).map(x => `<p>⚠️ ${escapeHtml(x)}</p>`).join("") || "<p>No major gaps returned.</p>"}
+          ${(d.warnings || []).map(x => `<p class="small">🔒 ${escapeHtml(x)}</p>`).join("")}
+        </div>
+      </div>
+
+      <div class="panel">
+        <h3>Proposal</h3>
+        <textarea id="groqProposalText">${escapeHtml(d.proposal || "")}</textarea>
+        <button onclick="copyText('groqProposalText')">Copy Proposal</button>
+      </div>
+
+      <div class="panel">
+        <h3>Cover Letter</h3>
+        <textarea id="groqCoverText">${escapeHtml(d.cover_letter || "")}</textarea>
+        <button onclick="copyText('groqCoverText')">Copy Cover Letter</button>
+      </div>
+
+      <div class="grid grid2">
+        <div class="panel">
+          <h3>Follow-up</h3>
+          <textarea id="groqFollowText">${escapeHtml(d.follow_up || "")}</textarea>
+          <button onclick="copyText('groqFollowText')">Copy Follow-up</button>
+        </div>
+        <div class="panel">
+          <h3>Interview Pitch</h3>
+          <textarea id="groqPitchText">${escapeHtml(d.interview_pitch || "")}</textarea>
+          <button onclick="copyText('groqPitchText')">Copy Pitch</button>
+        </div>
+      </div>
+
+      <div class="panel">
+        <button class="green" onclick="saveGroqWingman()">Save to Tracker</button>
+        <a class="btn" target="_blank" href="${escapeHtml(q("groqJobUrl").value || "#")}">Open Job Portal</a>
+      </div>
+    `;
+  }catch(e){
+    q("groqWingmanStatus").innerHTML = `<div class="error">Groq Wingman failed: ${escapeHtml(e.message)}</div>`;
+  }
+}
+
+async function saveGroqWingman(){
+  if(!window.lastGroqWingman){
+    alert("Generate Wingman output first.");
+    return;
+  }
+  try{
+    const d = window.lastGroqWingman;
+    const res = await post("/api/wingman/groq-save/" + userId, fd({
+      job_id:"groq-" + Date.now(),
+      title:q("groqJobTitle").value,
+      company:q("groqCompany").value,
+      url:q("groqJobUrl").value,
+      score:d.match_score || 0,
+      proposal:q("groqProposalText").value,
+      cover_letter:q("groqCoverText").value,
+      follow_up:q("groqFollowText").value
+    }));
+    alert(res.message || "Saved to tracker");
+  }catch(e){
+    alert("Save failed: " + e.message);
+  }
+}
+
+function copyText(id){
+  const el = q(id);
+  el.select();
+  el.setSelectionRange(0, 99999);
+  document.execCommand("copy");
+  alert("Copied");
+}
+
+async function completeTask(taskId){
+  try{
+    const d = await post("/api/tasks/" + taskId + "/complete", fd({}));
+    alert("Task completed. Streak: " + d.streak_days + " days");
+    await loadExecutionEngine();
+  }catch(e){
+    alert("Complete failed: " + e.message);
+  }
+}
+
+async function reopenTask(taskId){
+  try{
+    await post("/api/tasks/" + taskId + "/reopen", fd({}));
+    await loadExecutionEngine();
+  }catch(e){
+    alert("Reopen failed: " + e.message);
+  }
+}
+
+async function createExecutionTask(){
+  try{
+    const d = await post("/api/execution-engine/create-task/" + userId, fd({
+      title:q("newTaskTitle").value,
+      description:q("newTaskDesc").value,
+      estimated_reward:q("newTaskReward").value
+    }));
+    q("taskCreateResult").innerHTML = `<div class="success">Task created.</div>`;
+    await loadExecutionEngine();
+  }catch(e){
+    q("taskCreateResult").innerHTML = `<div class="error">Create failed: ${escapeHtml(e.message)}</div>`;
+  }
+}
+
+
+async function loadTracker(){ if(!requireLogin("tracker")) return; const apps = await get("/api/tracking/" + userId); const inc = await get("/api/income/" + userId); q("tracker").innerHTML = `<div class="panel glow"><h2>Tracker</h2><span class="chip">Applications: ${apps.items.length}</span><span class="chip">Income entries: ${inc.items.length}</span></div><div class="grid grid2"><div class="panel"><h3>Add Income Proof</h3><input id="incomeSource" placeholder="Source"><input id="incomeAmount" type="number" placeholder="Amount"><input id="incomeNote" placeholder="Note"><button onclick="addIncome()">Save Income</button></div><div class="panel"><h3>Income Proof</h3>${inc.items.map(i => `<div class="card"><b>${escapeHtml(i.source)}</b><p>${money(i.amount)} · ${escapeHtml(i.note)}</p></div>`).join("") || "<p>No income yet.</p>"}</div></div><div class="panel"><h3>Applications</h3>${apps.items.map(a => `<div class="card"><h3>${escapeHtml(a.title)}</h3><p>${escapeHtml(a.company)} · Score ${a.score}% · ${escapeHtml(a.status)}</p><a class="btn" target="_blank" href="${a.url}">Open</a></div>`).join("") || "<p>No applications saved yet.</p>"}</div>`; }
+async function addIncome(){ await post("/api/income/" + userId, fd({source:q("incomeSource").value, amount:q("incomeAmount").value, note:q("incomeNote").value})); loadTracker(); }
+
+
+async function loadEarningDashboard(){
+  if(!requireLogin("earning")) return;
+  q("earning").innerHTML = `<div class="panel">Loading income dashboard...</div>`;
+  try{
+    const d = await get("/api/earning-dashboard/" + userId);
+    const m = d.metrics;
+    q("earning").innerHTML = `
+      <div class="panel glow">
+        <h2>Income Dashboard</h2>
+        <p>Track real proof, daily income target, recruiter credibility, and monthly earning forecast.</p>
+        <span class="chip">Today: ${money(m.today_income)} / ${money(m.today_target)}</span>
+        <span class="chip">Progress: ${m.daily_progress_percent}%</span>
+        <span class="chip">Total Proof: ${money(m.total_income)}</span>
+      </div>
+
+      <div class="grid grid4">
+        <div class="metric"><span>Today Earned</span><h3>${money(m.today_income)}</h3>${bar(m.daily_progress_percent)}</div>
+        <div class="metric"><span>Total Income Proof</span><h3>${money(m.total_income)}</h3></div>
+        <div class="metric"><span>7-Day Forecast</span><h3>${money(m.projected_7_day)}</h3></div>
+        <div class="metric"><span>30-Day Forecast</span><h3>${money(m.projected_30_day)}</h3></div>
+      </div>
+
+      <div class="grid grid2">
+        <div class="panel">
+          <h3>Add Earning / Proof</h3>
+          <select id="proofType">
+            <option value="income">Income received</option>
+            <option value="portfolio">Portfolio/sample proof</option>
+            <option value="project">Project proof</option>
+            <option value="application">Application proof</option>
+          </select>
+          <input id="proofSource" placeholder="Source, e.g. Medical Writing Sample">
+          <input id="proofAmount" type="number" value="500" placeholder="Amount or proof value">
+          <input id="proofNote" placeholder="Note, e.g. Practice portfolio proof">
+          <button class="green" onclick="addEarningProof()">Save Proof</button>
+          <div id="proofResult"></div>
+        </div>
+
+        <div class="panel">
+          <h3>Next Money Actions</h3>
+          ${d.next_actions.map(a => `<p>✅ ${escapeHtml(a)}</p>`).join("")}
+          <p class="small">${escapeHtml(d.forecast_note)}</p>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h3>Recruiter Proof Wall</h3>
+        ${d.proof_items.length ? d.proof_items.map(p => `
+          <div class="card">
+            <h3>${escapeHtml(p.title)}</h3>
+            <p>${money(p.amount)} · ${escapeHtml(p.note)}</p>
+            <span class="chip">${escapeHtml(p.created_at)}</span>
+          </div>
+        `).join("") : `<p>No proof yet. Add income, portfolio, project, or sample proof.</p>`}
+      </div>
+    `;
+  }catch(e){
+    q("earning").innerHTML = `<div class="error">Income Dashboard failed: ${escapeHtml(e.message)}</div>`;
+  }
+}
+
+async function addEarningProof(){
+  try{
+    const d = await post("/api/earning-proof/" + userId, fd({
+      proof_type:q("proofType").value,
+      source:q("proofSource").value,
+      amount:q("proofAmount").value,
+      note:q("proofNote").value
+    }));
+    q("proofResult").innerHTML = `<div class="success">${escapeHtml(d.message)}</div>`;
+    await loadEarningDashboard();
+  }catch(e){
+    q("proofResult").innerHTML = `<div class="error">Save failed: ${escapeHtml(e.message)}</div>`;
+  }
+}
+
+
+
+async function loadBooster(){
+  if(!requireLogin("booster")) return;
+  q("booster").innerHTML = `<div class="panel">Loading score booster...</div>`;
+  try{
+    const d = await get("/api/score-booster/" + userId);
+    q("booster").innerHTML = `
+      <div class="panel glow">
+        <h2>Auto Skill + Score Booster</h2>
+        <p>This improves resume keywords, recruiter headline, proof tasks and talent score readiness.</p>
+        <span class="chip">Current Score: ${d.current_talent_score}%</span>
+        <span class="chip">Expected After Boost: ${d.expected_after_boost}%</span>
+        <span class="chip">Hire Ready: ${d.ready_for_hire ? "Yes" : "Not yet"}</span>
+      </div>
+      <div class="grid grid2">
+        <div class="panel">
+          <h3>Recommended Skills</h3>
+          ${d.recommended_skills.map(s => `<span class="chip">${escapeHtml(s)}</span>`).join("")}
+          <h3>Missing Skills</h3>
+          ${d.missing_skills.map(s => `<span class="chip">+ ${escapeHtml(s)}</span>`).join("") || "<p>No major missing skills.</p>"}
+          <button class="green" onclick="applyBooster()">🚀 Improve My Talent Score</button>
+          <div id="boosterResult"></div>
+        </div>
+        <div class="panel">
+          <h3>Score Improvement Actions</h3>
+          ${d.actions.map(a => `<div class="card"><h3>${escapeHtml(a.title)}</h3><p>${escapeHtml(a.task)}</p><span class="chip">Impact: ${escapeHtml(a.impact)}</span></div>`).join("")}
+        </div>
+      </div>
+      <div class="panel">
+        <h3>Current Score Breakdown</h3>
+        <div class="grid grid4">
+          <div class="metric"><span>Resume</span><h3>${d.current_profile.resume_score}%</h3>${bar(d.current_profile.resume_score)}</div>
+          <div class="metric"><span>Activity</span><h3>${d.current_profile.activity_score}%</h3>${bar(d.current_profile.activity_score)}</div>
+          <div class="metric"><span>Applications</span><h3>${d.current_profile.application_score}%</h3>${bar(d.current_profile.application_score)}</div>
+          <div class="metric"><span>Skills</span><h3>${d.current_profile.skill_score}%</h3>${bar(d.current_profile.skill_score)}</div>
+        </div>
+      </div>`;
+  }catch(e){ q("booster").innerHTML = `<div class="error">Score Booster failed: ${escapeHtml(e.message)}</div>`; }
+}
+
+async function applyBooster(){
+  try{
+    const d = await post("/api/score-booster/apply/" + userId, fd({}));
+    q("boosterResult").innerHTML = `<div class="success"><h3>Boost applied</h3><p>${escapeHtml(d.message)}</p><p><b>New Talent Score:</b> ${d.talent.talent_score}%</p><button onclick="showPage('talent')">View Talent Profile</button></div>`;
+  }catch(e){ q("boosterResult").innerHTML = `<div class="error">Boost failed: ${escapeHtml(e.message)}</div>`; }
+}
+
+
+async function loadTalent(){
+  if(!requireLogin("talent")) return; const t = await get("/api/talent-profile/" + userId);
+  q("talent").innerHTML = `<div class="panel glow"><h2>Your Talent Profile</h2><p>${escapeHtml(t.recruiter_pitch)}</p><span class="chip">${escapeHtml(t.level)}</span><span class="chip">Ready for hire: ${t.ready_for_hire ? "Yes" : "Building"}</span></div><div class="grid grid4"><div class="metric"><span>Talent Score</span><h3>${t.talent_score}%</h3>${bar(t.talent_score)}</div><div class="metric"><span>Resume</span><h3>${t.resume_score}%</h3>${bar(t.resume_score)}</div><div class="metric"><span>Activity</span><h3>${t.activity_score}%</h3>${bar(t.activity_score)}</div><div class="metric"><span>Skills</span><h3>${t.skill_score}%</h3>${bar(t.skill_score)}</div></div><div class="grid grid2"><div class="panel"><h3>Proof Badges</h3>${t.proof_badges.map(x => `<span class="chip">✅ ${escapeHtml(x)}</span>`).join("") || "<p>No proof badges yet.</p>"}</div><div class="panel"><h3>Improve Next</h3>${t.missing_actions.map(x => `<p>⚠️ ${escapeHtml(x)}</p>`).join("") || "<p>Strong profile. Keep applying and adding proof.</p>"}</div></div><div class="panel"><h3>Recruiter View</h3><p><b>${escapeHtml(t.name)}</b></p><p>${escapeHtml(t.headline)}</p><p>${escapeHtml(t.location)} · ${t.experience_years} years</p>${t.skills.map(s => `<span class="chip">${escapeHtml(s)}</span>`).join("")}</div>`;
+}
+
+
+async function loadRecruiter(){
+  q("recruiter").innerHTML = `<div class="panel">Loading recruiter hiring system...</div>`;
+  try{
+    const d = await get("/api/recruiter/dashboard");
+    const pool = await get("/api/talent-pool");
+    const jobs = await get("/api/recruiter/jobs?status=all");
+
+    q("recruiter").innerHTML = `
+      <div class="panel glow">
+        <h2>Recruiter Hiring System</h2>
+        <p>Post jobs inside Zero2Earn, instantly match candidates, auto-shortlist, and create contact requests.</p>
+        <span class="chip">Total Candidates: ${d.metrics.total_candidates}</span>
+        <span class="chip">Hire Ready: ${d.metrics.hire_ready}</span>
+        <span class="chip">Average Score: ${d.metrics.average_score}%</span>
+        <span class="chip">Posted Jobs: ${jobs.items.length}</span>
+      </div>
+
+      <div class="grid grid2">
+        <div class="panel">
+          <h2>Post Recruiter Job</h2>
+          <input id="rName" value="Demo Recruiter" placeholder="Recruiter name">
+          <input id="rEmail" value="recruiter@company.com" placeholder="Recruiter email">
+          <input id="rCompany" value="Demo Company" placeholder="Company">
+          <input id="jobTitle" value="Healthcare AI Content Reviewer" placeholder="Job title">
+          <textarea id="jobDesc" placeholder="Job description">Review healthcare and medical AI content for accuracy, clarity, and safety.</textarea>
+          <input id="jobSkills" value="medical writing, healthcare consulting, clinical research, AI tools, patient education" placeholder="Required skills comma separated">
+          <input id="jobLocation" value="India / Remote" placeholder="Location">
+          <input id="jobSalary" value="₹30,000-₹90,000/month" placeholder="Salary range">
+          <select id="jobType">
+            <option>Full-time / Contract</option>
+            <option>Remote Contract</option>
+            <option>Internship</option>
+            <option>Freelance</option>
+            <option>Part-time</option>
+          </select>
+          <button onclick="postRecruiterJob()">Post Job + Match Candidates</button>
+          <div id="postJobResult"></div>
+        </div>
+
+        <div class="panel">
+          <h2>Recruiter Value</h2>
+          ${d.recruiter_value.map(v => `<p>✅ ${escapeHtml(v)}</p>`).join("")}
+          <div class="details">
+            <b>Money model:</b>
+            <p>Free recruiters can view limited candidates. Paid company plan unlocks full profiles, job posting, auto-shortlist, and contact requests.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>Posted Jobs</h2>
+        ${jobs.items.length ? jobs.items.map(j => `
+          <div class="card">
+            <h3>${escapeHtml(j.title)}</h3>
+            <p>${escapeHtml(j.company)} · ${escapeHtml(j.location)} · ${escapeHtml(j.salary_range)}</p>
+            <span class="chip">${escapeHtml(j.status)}</span>
+            <span class="chip">${escapeHtml(j.job_type)}</span>
+            <p><b>Skills:</b> ${escapeHtml(j.required_skills)}</p>
+            <button onclick="loadJobMatches(${j.id})">View Matches</button>
+            <button class="green" onclick="autoShortlist(${j.id})">🔥 Auto Shortlist Top 10</button>
+          </div>
+        `).join("") : `<p>No jobs posted yet. Post one above.</p>`}
+      </div>
+
+      <div id="jobMatches"></div>
+
+      <div class="panel">
+        <h2>Talent Pool</h2>
+        <p class="small">Recruiter-ready users sorted by readiness and activity.</p>
+        <div class="jobs">
+          ${pool.items.map(c => `
+            <div class="card">
+              <div class="score">${c.talent_score}%</div>
+              <h3>${escapeHtml(c.name)}</h3>
+              <p>${escapeHtml(c.headline)}</p>
+              <p>${escapeHtml(c.location)} · ${c.experience_years} years</p>
+              <span class="chip">${escapeHtml(c.level)}</span>
+              <span class="chip">${c.ready_for_hire ? "Hire-ready" : "Building"}</span>
+              <div>${c.proof_badges.map(b => `<span class="chip">✅ ${escapeHtml(b)}</span>`).join("")}</div>
+              <div>${c.skills.map(s => `<span class="chip">${escapeHtml(s)}</span>`).join("")}</div>
+              <p>${escapeHtml(c.recruiter_pitch)}</p>
+              <button onclick="openCandidateDetail(${c.id})">Open Full Profile</button>
+              <button onclick="shortlistCandidate(${c.id})">Shortlist</button>
+              <button class="green" onclick="contactCandidate(${c.id})">Contact Request</button>
+            </div>
+          `).join("")}
+        </div>
+      </div>
+
+      <div id="candidateDetail"></div>
+      <div id="recruiterAction"></div>
+    `;
+  }catch(e){
+    q("recruiter").innerHTML = `
+      <div class="error">
+        <h2>Recruiter system did not load</h2>
+        <p><b>Reason:</b> ${escapeHtml(e.message)}</p>
+        <p>This usually means the backend was not restarted after replacing app.py, or the old backend is still running.</p>
+      </div>
+      <div class="panel">
+        <h3>Fix now</h3>
+        <p>1. Stop backend with CTRL + C</p>
+        <p>2. Replace <b>zero2earn_backend/api/app.py</b> again from the ZIP</p>
+        <p>3. Restart:</p>
+        <textarea>python -m uvicorn zero2earn_backend.api.app:app --reload</textarea>
+        <p>4. Open this in browser to confirm:</p>
+        <textarea>/api/recruiter/jobs?status=all</textarea>
+      </div>
+    `;
+  }
+}
+
+async function postRecruiterJob(){
+  const d = await post("/api/recruiter/post-job", fd({
+    recruiter_name:q("rName").value,
+    recruiter_email:q("rEmail").value,
+    company:q("rCompany").value,
+    title:q("jobTitle").value,
+    description:q("jobDesc").value,
+    required_skills:q("jobSkills").value,
+    location:q("jobLocation").value,
+    salary_range:q("jobSalary").value,
+    job_type:q("jobType").value
+  }));
+  q("postJobResult").innerHTML = `<div class="success">Job posted. Job ID: ${d.job_id}. Loading matches...</div>`;
+  await loadJobMatches(d.job_id);
+}
+
+async function loadJobMatches(jobId){
+  const d = await get("/api/recruiter/job-matches/" + jobId);
+  q("jobMatches").innerHTML = `
+    <div class="panel glow">
+      <h2>Matched Candidates for: ${escapeHtml(d.job.title)}</h2>
+      <p>${escapeHtml(d.job.company)} · ${escapeHtml(d.job.location)} · ${escapeHtml(d.job.salary_range)}</p>
+      ${d.required_skills.map(s => `<span class="chip">Required: ${escapeHtml(s)}</span>`).join("")}
+      <br>
+      <button class="green" onclick="autoShortlist(${jobId})">🔥 Auto Shortlist Top 10</button>
+    </div>
+
+    <div class="jobs">
+      ${d.matches.map(m => {
+        const c = m.candidate;
+        return `
+          <div class="card">
+            <div class="score">${m.match_score}%</div>
+            <h3>${escapeHtml(c.name)}</h3>
+            <p>${escapeHtml(c.headline)}</p>
+            <p>${escapeHtml(c.location)} · Talent ${c.talent_score}%</p>
+            <span class="chip">${escapeHtml(m.recommended_action)}</span>
+            ${m.match_reasons.map(r => `<p>✅ ${escapeHtml(r)}</p>`).join("")}
+            <div>${c.skills.map(s => `<span class="chip">${escapeHtml(s)}</span>`).join("")}</div>
+            <button onclick="openCandidateDetail(${c.id})">Open Full Profile</button>
+            <button onclick="shortlistCandidate(${c.id})">Shortlist</button>
+            <button class="green" onclick="contactCandidate(${c.id})">Contact Request</button>
+          </div>
+        `;
+      }).join("")}
+    </div>
+  `;
+}
+
+async function autoShortlist(jobId){
+  const d = await post("/api/recruiter/auto-shortlist/" + jobId, fd({
+    recruiter_name:"Demo Recruiter",
+    recruiter_email:"recruiter@company.com",
+    company:"Demo Company",
+    limit:10,
+    min_score:50
+  }));
+  q("recruiterAction").innerHTML = `<div class="success">Auto-shortlist complete. ${d.shortlisted_count} candidates shortlisted.</div>`;
+}
+
+async function openCandidateDetail(id){
+  const d = await get("/api/recruiter/candidate/" + id);
+  const c = d.candidate;
+  q("candidateDetail").innerHTML = `
+    <div class="panel glow">
+      <h2>Full Candidate Profile: ${escapeHtml(c.name)}</h2>
+      <p>${escapeHtml(c.headline)}</p>
+      <span class="chip">${escapeHtml(c.level)}</span>
+      <span class="chip">Talent ${c.talent_score}%</span>
+      <span class="chip">${c.ready_for_hire ? "Hire-ready" : "Building"}</span>
+    </div>
+
+    <div class="grid grid4">
+      <div class="metric"><span>Resume</span><h3>${d.score_breakdown.resume_score}%</h3>${bar(d.score_breakdown.resume_score)}</div>
+      <div class="metric"><span>Activity</span><h3>${d.score_breakdown.activity_score}%</h3>${bar(d.score_breakdown.activity_score)}</div>
+      <div class="metric"><span>Applications</span><h3>${d.score_breakdown.application_score}%</h3>${bar(d.score_breakdown.application_score)}</div>
+      <div class="metric"><span>Skills</span><h3>${d.score_breakdown.skill_score}%</h3>${bar(d.score_breakdown.skill_score)}</div>
+    </div>
+
+    <div class="grid grid2">
+      <div class="panel">
+        <h3>Skills</h3>
+        ${c.skills.map(s => `<span class="chip">${escapeHtml(s)}</span>`).join("")}
+        <h3>Proof Badges</h3>
+        ${c.proof_badges.map(b => `<span class="chip">✅ ${escapeHtml(b)}</span>`).join("") || "<p>No badges yet.</p>"}
+      </div>
+      <div class="panel">
+        <h3>Recruiter Risk/Next Actions</h3>
+        ${c.missing_actions.map(x => `<p>⚠️ ${escapeHtml(x)}</p>`).join("") || "<p>No major gaps.</p>"}
+        <h3>Best For</h3>
+        ${d.recruiter_summary.best_for.map(x => `<span class="chip">${escapeHtml(x)}</span>`).join("")}
+      </div>
+    </div>
+
+    <div class="panel">
+      <h3>Resume Preview</h3>
+      <textarea>${escapeHtml(d.resume_text || "No resume text available.")}</textarea>
+    </div>
+
+    <div class="panel">
+      <h3>Application History</h3>
+      ${d.applications.map(a => `<div class="card"><h3>${escapeHtml(a.title)}</h3><p>${escapeHtml(a.company)} · ${a.score}% · ${escapeHtml(a.status)}</p></div>`).join("") || "<p>No applications yet.</p>"}
+    </div>
+
+    <div class="panel">
+      <h3>Income / Project Proof</h3>
+      ${d.income_proof.map(i => `<div class="card"><b>${escapeHtml(i.source)}</b><p>${money(i.amount)} · ${escapeHtml(i.note)}</p></div>`).join("") || "<p>No income proof yet.</p>"}
+    </div>
+  `;
+}
+
+async function loadPlans(){ const d = await get("/api/plans"); q("plans").innerHTML = `<div class="panel glow"><h2>Plans</h2><p>Monetization model for users, colleges, recruiters and companies.</p></div><div class="grid grid4">${d.items.map(p => `<div class="card"><h3>${escapeHtml(p.name)}</h3><h2>${escapeHtml(p.price)}</h2><p>${escapeHtml(p.for)}</p>${p.features.map(f => `<p>✅ ${escapeHtml(f)}</p>`).join("")}</div>`).join("")}</div>`; }
+
+if(userId){ setLoggedInUI(true); q("loginBox").classList.add("hidden"); q("userBox").classList.remove("hidden"); setLoggedInUI(true); showPage("home"); }
+</script>
+
+<script id="z2eSafeBoot">
+document.addEventListener("DOMContentLoaded", function(){
+  try{
+    if(localStorage.getItem("z2e_user_id")){
+      document.body.classList.add("logged-in");
+    }
+  }catch(e){}
+});
+
+
+
+async function trackMicroTask(platform){
+  q("microPlatform").value = platform;
+  q("microAmount").value = 100;
+  q("microNote").value = "Micro task completed / onboarding proof";
+  await saveMicroProof();
+}
+
+async function saveMicroProof(){
+  try{
+    const d = await post("/api/micro-jobs/track/" + userId, fd({
+      platform:q("microPlatform").value || "Micro Income",
+      amount:q("microAmount").value || 100,
+      note:q("microNote").value || ""
+    }));
+    q("microResult").innerHTML = `<div class="success">${escapeHtml(d.message)}</div>`;
+  }catch(e){
+    q("microResult").innerHTML = `<div class="error">Save failed: ${escapeHtml(e.message)}</div>`;
+  }
+}
+
+async function loadAutomation(){
+  if(!requireLogin("automation")) return;
+  q("automation").innerHTML = `
+    <div class="panel glow">
+      <h2>Automation Command</h2>
+      <p>Safe automation planner: prepares actions, reminders and queues. It does not auto-apply or fake activity.</p>
+      <span class="chip">Daily Mode ON</span>
+      <span class="chip">Manual official apply</span>
+      <span class="chip">Follow-up engine</span>
+    </div>
+
+    <div class="grid grid2">
+      <div class="panel">
+        <h3>Run Daily Plan</h3>
+        <p>Generate today’s action queue from Apply Engine, Wingman, Micro Income and Tracker.</p>
+        <button class="green" onclick="runDailyAutomation()">Generate Today’s Plan</button>
+        <div id="automationResult"></div>
+      </div>
+      <div class="panel">
+        <h3>Fast Links</h3>
+        <button onclick="showPage('daily500')">Daily ₹500 Mode</button>
+        <button onclick="showPage('apply')">Apply Engine</button>
+        <button onclick="showPage('wingman')">Wingman</button>
+        <button onclick="showPage('tracker')">Tracker</button>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h3>Automation Rules</h3>
+      <p>✅ Prepare jobs before applying</p>
+      <p>✅ Use Wingman for every strong job</p>
+      <p>✅ Track every application</p>
+      <p>✅ Follow up after 3–5 days</p>
+      <p>✅ Use micro tasks when replies are slow</p>
+    </div>
+  `;
+}
+
+async function runDailyAutomation(){
+  try{
+    const d = await post("/api/automation/run-daily/" + userId, fd({}));
+    q("automationResult").innerHTML = `<div class="success">${escapeHtml(d.message)}</div>` + d.commands.map(c => `<div class="card">✅ ${escapeHtml(c)}</div>`).join("");
+  }catch(e){
+    q("automationResult").innerHTML = `<div class="error">Automation failed: ${escapeHtml(e.message)}</div>`;
+  }
+}
+
+async function loadExecutionEngine(){
+  if(!requireLogin("execution")) return;
+  q("execution").innerHTML = `<div class="panel">Loading execution streak...</div>`;
+  try{
+    const d = await get("/api/execution-engine/" + userId);
+    const m = d.metrics;
+    const u = d.user;
+    q("execution").innerHTML = `
+      <div class="panel glow">
+        <h2>Execution Streak</h2>
+        <p>${escapeHtml(d.daily_status)}</p>
+        <span class="chip">🔥 Streak: ${u.streak_days || 0} days</span>
+        <span class="chip">Execution Score: ${m.execution_score || 0}%</span>
+        <span class="chip">Completed: ${m.completed_tasks || 0}</span>
+      </div>
+
+      <div class="grid grid4">
+        <div class="metric"><span>Pending</span><h3>${m.pending_tasks || 0}</h3></div>
+        <div class="metric"><span>Completed</span><h3>${m.completed_tasks || 0}</h3></div>
+        <div class="metric"><span>Daily Goal</span><h3>${m.daily_goal_tasks || 2}</h3></div>
+        <div class="metric"><span>Value</span><h3>${money(m.estimated_reward_pending || 0)}</h3></div>
+      </div>
+
+      <div class="panel">
+        <h3>Tasks</h3>
+        ${d.tasks.map(t => `
+          <div class="card">
+            <h3>${escapeHtml(t.title)}</h3>
+            <p>${escapeHtml(t.description)}</p>
+            <span class="chip">${escapeHtml(t.status)}</span>
+            <span class="chip">${money(t.estimated_reward || 0)}</span>
+            ${t.status === "completed" ? `<button class="secondary">Completed</button>` : `<button class="green" onclick="completeTask(${t.id})">Complete Task</button>`}
+          </div>
+        `).join("")}
+      </div>
+    `;
+  }catch(e){
+    q("execution").innerHTML = `<div class="error">Execution failed: ${escapeHtml(e.message)}</div>`;
+  }
+}
+
+async function loadSkills(){
+  if(!requireLogin("skills")) return;
+  const current = ["medical writing","healthcare consulting","clinical research","telemedicine","patient education","AI evaluation","remote communication"];
+  const missing = ["portfolio","proposal writing","case studies","proof of work","LinkedIn optimization"];
+  const plan = [
+    ["Resume proof points","Add measurable results and strongest role keywords."],
+    ["Proposal writing","Create 3 job-specific proposals."],
+    ["Portfolio","Create 2 sample work pieces."],
+    ["Remote profile","Optimize LinkedIn, Upwork and freelance profiles."],
+    ["Follow-up","Send polite follow-up messages."],
+    ["Micro income","Complete onboarding on 2 platforms."],
+    ["Recruiter readiness","Finalize profile for premium visibility."]
+  ];
+
+  q("skills").innerHTML = `
+    <div class="panel glow">
+      <h2>Skill Engine</h2>
+      <p>Interactive 7-day plan to improve job matches, recruiter trust and daily earning readiness.</p>
+      <span class="chip">Skill gaps</span>
+      <span class="chip">Portfolio proof</span>
+      <span class="chip">Recruiter readiness</span>
+    </div>
+
+    <div class="grid grid2">
+      <div class="panel">
+        <h3>Current Skills</h3>
+        ${current.map(s => `<span class="chip">${s}</span>`).join("")}
+      </div>
+      <div class="panel">
+        <h3>Missing Skills</h3>
+        ${missing.map(s => `<span class="chip">+ ${s}</span>`).join("")}
+      </div>
+    </div>
+
+    <div class="panel">
+      <h3>7-Day Interactive Plan</h3>
+      ${plan.map((p,i) => `
+        <div class="card">
+          <h3>Day ${i+1}: ${p[0]}</h3>
+          <p>${p[1]}</p>
+          <button class="green" onclick="completeSkillDay(${i+1}, '${p[0].replace(/'/g,"")}')">Mark Day ${i+1} Complete</button>
+        </div>
+      `).join("")}
+      <div id="skillResult"></div>
+    </div>
+  `;
+}
+
+async function completeSkillDay(day, title){
+  try{
+    const d = await post("/api/skills/complete-day/" + userId, fd({
+      day:day,
+      title:title,
+      note:"Completed from Skill Engine"
+    }));
+    q("skillResult").innerHTML = `<div class="success">${escapeHtml(d.message)}</div>`;
+  }catch(e){
+    q("skillResult").innerHTML = `<div class="error">Skill update failed: ${escapeHtml(e.message)}</div>`;
+  }
+}
+
+
+
+async function loadFirst100(){
+  if(!requireLogin("first100")) return;
+  q("first100").innerHTML = `<div class="panel">Loading First ₹100 Mission...</div>`;
+  try{
+    const d = await get("/api/first-100/" + userId);
+    const s = d.summary;
+    const portals = d.portals || [];
+    const best = bestPortal(portals);
+    const stepKeys = Object.keys(s.steps);
+    const nextKey = stepKeys.find(k => s.steps[k].done < s.steps[k].target) || stepKeys[0];
+    const nextStep = s.steps[nextKey] || {};
+
+    const labels = {
+      micro_started:"Open Portal",
+      micro_tracked:"Track Task",
+      job_prepared:"Prepare Job",
+      job_applied:"Apply",
+      proof_added:"Add Proof"
+    };
+
+    const path = stepKeys.map(k => {
+      const x = s.steps[k];
+      const done = x.done >= x.target;
+      const active = k === nextKey && !s.completed;
+      return `<div class="progress-step ${done ? "done" : active ? "active" : "locked"}">
+        <b>${done ? "✅" : active ? "🔥" : "🔒"} ${escapeHtml(labels[k] || x.label)}</b>
+        <span>${done ? "Completed" : active ? "Do now" : "Locked"}</span>
+      </div>`;
+    }).join("");
+
+    const stepList = stepKeys.map(k => {
+      const x = s.steps[k];
+      const pct = Math.min(100, Math.round((x.done / Math.max(1, x.target)) * 100));
+      const doneIcon = pct >= 100 ? "✅" : "⬜";
+      return `<div class="mini-step"><b>${doneIcon} ${escapeHtml(x.label)}</b><span>${x.done}/${x.target}</span>${bar(pct)}</div>`;
+    }).join("");
+
+    const directButton = (() => {
+      const text = String(s.next_action || "").toLowerCase();
+      if(text.includes("micro") || text.includes("portal")){
+        return best ? `<a class="btn green primary-big" target="_blank" href="${best.url}" onclick="setTimeout(()=>first100Portal('${String(best.name).replace(/'/g,"")}'),500)">▶ Open ${escapeHtml(best.name)} Now</a>` : `<button class="green primary-big" onclick="showPage('micro')">▶ Open Micro Income</button>`;
+      }
+      if(text.includes("wingman") || text.includes("prepare")) return `<button class="green primary-big" onclick="showPage('wingman')">▶ Prepare With Wingman</button>`;
+      if(text.includes("apply")) return `<button class="green primary-big" onclick="showPage('apply')">▶ Open Apply Engine</button>`;
+      if(text.includes("proof")) return `<button class="green primary-big" onclick="showPage('earning')">▶ Add Proof</button>`;
+      return `<button class="green primary-big" onclick="continueFirst100('${escapeHtml(s.next_action)}')">▶ Continue Mission</button>`;
+    })();
+
+    q("first100").innerHTML = `
+      <div class="mission-hero-final">
+        <div class="mission-kicker">AI Income Command Center</div>
+        <div class="mission-money"><span class="money-count" data-count-money="${Number(s.estimated_value||0)}"></span> / ${money(s.target)}</div>
+        ${bar(s.progress_percent)}
+        <div class="mission-state-row" style="margin-bottom:12px">
+          <div class="mission-state-card"><b>Mode</b><span>First ₹100 ${s.completed ? "complete" : "active"}</span></div>
+          <div class="mission-state-card"><b>Next unlock</b><span>Daily ₹500 execution loop</span></div>
+          <div class="mission-state-card"><b>Streak starter</b><span>Complete 2 actions today</span></div>
+        </div>
+        <h2>${s.completed ? "🎉 First ₹100 Mission Complete" : "First ₹100 Mission"}</h2>
+
+        <div class="next-action-direct">
+          <div class="mission-kicker">Next action ready</div>
+          <h3>${escapeHtml(s.next_action)}</h3>
+          <p>Do only this now. The system will unlock the next step after progress is tracked.</p>
+          <div class="mission-cta-row">
+            ${directButton}
+            <button class="secondary" onclick="continueFirst100('${escapeHtml(s.next_action)}')">Show Step</button>
+            <button class="secondary" onclick="showPage('earning')">Proof Room</button>
+          </div>
+          <div class="urgency-line">⚡ Most users build first proof in 1–3 days with consistent action.</div>
+        </div>
+
+        <div class="progress-path">${path}</div>
+      </div>
+
+      <div class="focus-grid">
+        <div class="next-action-card">
+          <span class="mission-kicker">Do this now</span>
+          <h3>${escapeHtml(nextStep.label || s.next_action)}</h3>
+          <p>Current progress: ${nextStep.done || 0}/${nextStep.target || 1}. Track the action after opening a portal or completing a task.</p>
+          <div class="action-strip">
+            <button class="green" onclick="first100Action('${nextKey}')">Mark This Done</button>
+            <button onclick="continueFirst100('${escapeHtml(s.next_action)}')">Open Related Tool</button>
+            <button onclick="first100Action('proof_added')">Add ₹100 Proof</button>
+          </div>
+        </div>
+
+        <div class="priority-portal">
+          <span class="mission-kicker">Best start</span>
+          ${best ? `
+            <h3>${escapeHtml(best.name)}</h3>
+            <p>${escapeHtml(best.best_for || "")}</p>
+            <span class="chip">${escapeHtml(best.category || "")}</span>
+            <span class="chip">${escapeHtml(best.speed || "")}</span>
+            <p class="small">${escapeHtml(best.first_100_path || "")}</p>
+            <a class="btn" target="_blank" href="${best.url}">Open Official Portal</a>
+            <button class="green" onclick="first100Portal('${String(best.name).replace(/'/g,"")}')">Track This Portal</button>
+          ` : `<p>No portal found.</p>`}
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>Mission Progress</h2>
+        <div class="mini-steps">${stepList}</div>
+      </div>
+
+      <div class="mission-wow-footer">
+        <span class="wow-chip">🔥 2 actions protect your streak</span>
+        <span class="wow-chip">🔒 No prepaid task scams</span>
+        <span class="wow-chip">🏆 Proof builds recruiter trust</span>
+        <span class="wow-chip">⚡ Daily ₹500 unlocks after first proof</span>
+      </div>
+
+      <details class="collapsed-section">
+        <summary>Show all 12 genuine earning portals</summary>
+        <div class="portal-grid-compact">
+          ${portals.map((p,i)=>`
+            <div class="portal-card-compact ${i<3 ? "featured" : ""}">
+              <h3>${escapeHtml(p.name)}</h3>
+              <p>${escapeHtml(p.best_for || "")}</p>
+              <span class="chip">${escapeHtml(p.category || "")}</span>
+              <span class="chip">${escapeHtml(p.earn_estimate || "")}</span>
+              <span class="chip">${escapeHtml(p.speed || "")}</span>
+              <p class="small">${escapeHtml(p.first_100_path || "")}</p>
+              <p class="small">🔒 ${escapeHtml(p.trust_note || "")}</p>
+              <a class="btn" target="_blank" href="${p.url}">Open Official Portal</a>
+              <button class="green" onclick="first100Portal('${String(p.name).replace(/'/g,"")}')">Track This Portal</button>
+            </div>
+          `).join("")}
+        </div>
+      </details>
+
+      <details class="collapsed-section">
+        <summary>Safety rules</summary>
+        <div class="panel">
+          ${s.safety_rules.map(r => `<p>🔒 ${escapeHtml(r)}</p>`).join("")}
+        </div>
+      </details>
+
+      <details class="collapsed-section">
+        <summary>Advanced mission controls</summary>
+        <div class="panel">
+          <button onclick="showPage('micro')">Open Micro Income</button>
+          <button onclick="showPage('wingman')">Prepare Job with Wingman</button>
+          <button onclick="showPage('apply')">Open Apply Engine</button>
+          <button onclick="showPage('earning')">Open Proof Wall</button>
+          <button class="warn" onclick="resetFirst100()">Reset Mission</button>
+        </div>
+      </details>
+    `;
+    z2eAfterRender();
+  }catch(e){
+    q("first100").innerHTML = `<div class="error">First ₹100 Mission failed: ${escapeHtml(e.message)}</div>`;
+  }
+}
+function continueFirst100(nextAction){
+  const text = String(nextAction || "").toLowerCase();
+  if(text.includes("micro") || text.includes("portal")) return showPage("micro");
+  if(text.includes("wingman") || text.includes("prepare")) return showPage("wingman");
+  if(text.includes("apply")) return showPage("apply");
+  if(text.includes("proof")) return showPage("earning");
+  return showPage("micro");
+}
+
+async function first100Action(action){
+  try{
+    await post("/api/first-100/action/" + userId, fd({action:action, amount:1, note:"Tracked from First ₹100 Mission"}));
+    z2eReward("Mission progress updated. You are closer to ₹100.");
+    await loadFirst100();
+  }catch(e){ alert("Mission update failed: " + e.message); }
+}
+
+async function first100Portal(name){
+  try{
+    await post("/api/first-100/action/" + userId, fd({action:"micro_started", amount:1, note:"Opened " + name}));
+    z2eReward("Portal tracked: " + name + ". Next step unlocked.");
+    await loadFirst100();
+  }catch(e){ alert("Track failed: " + e.message); }
+}
+
+async function resetFirst100(){
+  if(!confirm("Reset First ₹100 Mission progress for today?")) return;
+  await post("/api/first-100/reset/" + userId, fd({}));
+  await loadFirst100();
+}
+
+
+
+async function loadMicro(){
+  if(!requireLogin("micro")) return;
+  q("micro").innerHTML = `<div class="panel">Loading micro income portals...</div>`;
+  try{
+    const d = await get("/api/first-100/" + userId);
+    const portals = d.portals;
+    q("micro").innerHTML = `
+      <div class="panel glow">
+        <h2>Micro Income Engine</h2>
+        <p>12 genuine backup earning portals. Goal: first ₹100 proof, not fake promises.</p>
+        <span class="chip">No investment</span>
+        <span class="chip">Official links only</span>
+        <span class="chip">First ₹100 support</span>
+      </div>
+
+      <div class="grid grid3">
+        <div class="metric"><span>Portals</span><h3>${portals.length}</h3></div>
+        <div class="metric"><span>Mission</span><h3>₹100</h3></div>
+        <div class="metric"><span>Rule</span><h3>No Fees</h3></div>
+      </div>
+
+      <div class="panel">
+        <h3>Safety First</h3>
+        ${d.summary.safety_rules.map(r => `<p>🔒 ${escapeHtml(r)}</p>`).join("")}
+      </div>
+
+      <div class="jobs">
+        ${portals.map(p => `
+          <div class="card">
+            <h3>${escapeHtml(p.name)}</h3>
+            <p>${escapeHtml(p.best_for)}</p>
+            <span class="chip">${escapeHtml(p.category)}</span>
+            <span class="chip">${escapeHtml(p.earn_estimate)}</span>
+            <span class="chip">${escapeHtml(p.difficulty)}</span>
+            <p>${escapeHtml(p.first_100_path)}</p>
+            <p class="small">🔒 ${escapeHtml(p.trust_note)}</p>
+            <a class="btn" target="_blank" href="${p.url}">Open Official Portal</a>
+            <button class="green" onclick="trackMicroFromCatalog('${p.name.replace(/'/g,"")}')">Track Task / Signup Done</button>
+          </div>
+        `).join("")}
+      </div>
+    `;
+  }catch(e){
+    q("micro").innerHTML = `<div class="error">Micro Income failed: ${escapeHtml(e.message)}</div>`;
+  }
+}
+
+async function trackMicroFromCatalog(name){
+  try{
+    await post("/api/first-100/action/" + userId, fd({action:"micro_tracked", amount:1, note:"Micro action completed: " + name}));
+    await post("/api/micro-jobs/track/" + userId, fd({platform:name, amount:100, note:"First ₹100 micro action"}));
+    alert("Tracked: " + name);
+  }catch(e){
+    alert("Track failed: " + e.message);
+  }
+}
+
+</script>
+
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+<script id="z2eRazorpayUpgradeLayer">
+async function startRazorpayCheckout(){
+  try{
+    const order = await post("/api/payment/create-order/" + userId, fd({}));
+    if(!window.Razorpay){
+      alert("Razorpay checkout script not loaded. Check internet connection.");
+      return;
+    }
+    const rz = new Razorpay({
+      key: order.key_id,
+      amount: order.amount,
+      currency: order.currency,
+      name: "Zero2Earn Pro",
+      description: "Monthly Pro Plan",
+      order_id: order.order_id,
+      handler: async function(response){
+        try{
+          const verified = await post("/api/payment/verify/" + userId, fd({
+            razorpay_order_id: response.razorpay_order_id,
+            razorpay_payment_id: response.razorpay_payment_id,
+            razorpay_signature: response.razorpay_signature
+          }));
+          alert(verified.message || "Pro activated");
+          const userPlan = document.getElementById("userPlan");
+          if(userPlan) userPlan.innerText = "Plan: pro";
+          showPage("first100");
+        }catch(e){
+          alert("Payment verification failed: " + e.message);
+        }
+      },
+      theme:{color:"#16a34a"}
+    });
+    rz.open();
+  }catch(e){
+    alert("Checkout failed: " + e.message);
+  }
+}
+
+function z2eUpgradeCard(){
+  return `<div class="panel glow" id="z2eUpgradeCard">
+    <h2>🚀 Unlock Zero2Earn Pro</h2>
+    <p>Unlimited AI Wingman, Daily ₹500 execution support, recruiter visibility and faster earning workflow.</p>
+    <span class="chip">₹299/month</span>
+    <span class="chip">Unlimited proposals</span>
+    <span class="chip">Recruiter boost</span>
+    <br><br>
+    <button class="green primary-big" onclick="startRazorpayCheckout()">🚀 Upgrade to Pro ₹299</button>
+  </div>`;
+}
+
+function z2eInjectPlansUpgrade(){
+  const plans = document.getElementById("plans");
+  if(!plans || document.getElementById("z2eUpgradeCard")) return;
+  plans.insertAdjacentHTML("afterbegin", z2eUpgradeCard());
+}
+
+async function showUpgradeIfNeeded(anchorId){
+  try{
+    const status = await get("/api/billing/status/" + userId);
+    if(!status || status.is_pro) return;
+    const target = document.getElementById(anchorId);
+    if(target && !document.getElementById("z2eUpgradeCard")){
+      target.insertAdjacentHTML("afterbegin", z2eUpgradeCard());
+    }
+  }catch(e){}
+}
+</script>
+
+
+<script id="z2eAutoConversionTelegramLayer">
+async function z2eConversionStatus(){
+  try{return await get("/api/conversion/status/" + userId);}catch(e){return null;}
+}
+function z2eAutoConversionCard(reason){
+  return `<div class="panel glow" id="z2eAutoConversionCard">
+    <h2>🚀 Unlock Zero2Earn Pro</h2>
+    <p>${escapeHtml(reason || "Unlock unlimited AI Wingman, Daily ₹500 execution support and recruiter visibility.")}</p>
+    <span class="chip">₹299/month</span>
+    <span class="chip">Unlimited Wingman</span>
+    <span class="chip">Daily ₹500 Mode</span>
+    <span class="chip">Recruiter visibility</span>
+    <br><br>
+    <button class="green primary-big" onclick="startRazorpayCheckout()">🚀 Upgrade to Pro ₹299</button>
+  </div>`;
+}
+function z2eStickyUpgrade(){
+  if(document.getElementById("z2eStickyUpgrade")) return;
+  const box = document.createElement("div");
+  box.id = "z2eStickyUpgrade";
+  box.style.cssText = "position:fixed;right:22px;bottom:22px;z-index:9998;box-shadow:0 20px 60px #0008;border-radius:18px;";
+  box.innerHTML = `<button class="green" onclick="startRazorpayCheckout()" style="padding:14px 18px;border-radius:18px;font-weight:900">🚀 Upgrade ₹299</button>`;
+  document.body.appendChild(box);
+}
+async function z2eRefreshConversionUI(){
+  const s = await z2eConversionStatus();
+  if(!s) return;
+  z2eStickyUpgrade();
+  const sticky = document.getElementById("z2eStickyUpgrade");
+  if(sticky) sticky.style.display = s.is_pro ? "none" : "block";
+}
+async function z2eInjectUpgradeIfTriggered(pageId){
+  const s = await z2eConversionStatus();
+  if(!s || s.is_pro || !s.upgrade_trigger || !s.upgrade_trigger.show) return;
+  const target = document.getElementById(pageId);
+  if(target && !document.getElementById("z2eAutoConversionCard")){
+    target.insertAdjacentHTML("afterbegin", z2eAutoConversionCard(s.upgrade_trigger.message));
+  }
+}
+async function z2eLockDaily500IfFree(){
+  const s = await z2eConversionStatus();
+  if(!s || s.is_pro) return false;
+  const el = document.getElementById("daily500");
+  if(!el) return false;
+  el.innerHTML = `<div class="mission-hero-final">
+    <div class="mission-kicker">Pro Value Locked</div>
+    <div class="mission-money">₹500/day</div>
+    <h2>🔒 Daily ₹500 Mode is a Pro execution system</h2>
+    <p class="mission-sub">First ₹100 Mission is free. Upgrade to unlock Daily ₹500 structured execution, unlimited Wingman and recruiter visibility.</p>
+    <div class="mission-cta-row">
+      <button class="green primary-big" onclick="startRazorpayCheckout()">🚀 Unlock Pro ₹299</button>
+      <button class="secondary" onclick="showPage('first100')">Continue Free Mission</button>
+    </div>
+  </div>`;
+  return true;
+}
+function z2eTelegramPanel(){
+  return `<div class="panel glow" id="z2eTelegramPanel">
+    <h2>📲 Telegram Alerts</h2>
+    <p>Connect Telegram for daily command updates, job alerts and recruiter alerts.</p>
+    <input id="telegramChatId" placeholder="Telegram chat ID">
+    <input id="telegramUsername" placeholder="Telegram username optional">
+    <button class="green" onclick="z2eLinkTelegram()">Connect Telegram</button>
+    <button onclick="z2eTestTelegram()">Send Test Alert</button>
+    <button onclick="z2eSendDailyTelegram()">Send Daily Command Now</button>
+    <p class="small">Message your bot /start, then open /api/telegram/get-updates to find chat ID.</p>
+    <div id="telegramResult"></div>
+  </div>`;
+}
+function z2eInjectTelegramPanel(pageId){
+  const target = document.getElementById(pageId);
+  if(target && !document.getElementById("z2eTelegramPanel")) target.insertAdjacentHTML("beforeend", z2eTelegramPanel());
+}
+async function z2eLinkTelegram(){
+  const chatId = document.getElementById("telegramChatId").value;
+  const username = document.getElementById("telegramUsername").value;
+  try{
+    const d = await post("/api/telegram/link/" + userId, fd({chat_id:chatId, username:username}));
+    document.getElementById("telegramResult").innerHTML = `<div class="success">Telegram linked: ${escapeHtml(d.chat_id || chatId)}</div>`;
+  }catch(e){
+    document.getElementById("telegramResult").innerHTML = `<div class="error">Telegram link failed: ${escapeHtml(e.message)}</div>`;
+  }
+}
+async function z2eTestTelegram(){
+  try{
+    const d = await post("/api/telegram/test/" + userId, fd({}));
+    document.getElementById("telegramResult").innerHTML = `<div class="success">Test alert result: ${escapeHtml(JSON.stringify(d))}</div>`;
+  }catch(e){
+    document.getElementById("telegramResult").innerHTML = `<div class="error">Test failed: ${escapeHtml(e.message)}</div>`;
+  }
+}
+async function z2eSendDailyTelegram(){
+  try{
+    const d = await post("/api/notifications/daily-command/" + userId, fd({}));
+    document.getElementById("telegramResult").innerHTML = `<div class="success">Daily command sent: ${escapeHtml(JSON.stringify(d))}</div>`;
+  }catch(e){
+    document.getElementById("telegramResult").innerHTML = `<div class="error">Send failed: ${escapeHtml(e.message)}</div>`;
+  }
+}
+function z2eWrapShowPageForConversion(){
+  if(window.__z2eConversionWrapped) return;
+  window.__z2eConversionWrapped = true;
+  const originalShowPage = window.showPage;
+  window.showPage = function(id){
+    originalShowPage(id);
+    setTimeout(z2eRefreshConversionUI, 400);
+    if(id === "daily500") setTimeout(z2eLockDaily500IfFree, 300);
+    if(id === "wingman") setTimeout(()=>z2eInjectUpgradeIfTriggered("wingman"), 700);
+    if(id === "plans"){
+      setTimeout(()=>z2eInjectUpgradeIfTriggered("plans"), 500);
+      setTimeout(()=>z2eInjectTelegramPanel("plans"), 800);
+    }
+    if(id === "first100") setTimeout(()=>z2eInjectUpgradeIfTriggered("first100"), 1000);
+  };
+}
+document.addEventListener("DOMContentLoaded", function(){
+  setTimeout(z2eWrapShowPageForConversion, 300);
+  setTimeout(z2eRefreshConversionUI, 900);
+});
+</script>
+
+
+<script id="z2eTelegramConnectFullUI">
+/* Zero2Earn Telegram Connect Full UI — no feature removal */
+function z2eTelegramConnectCard(){
+  return `<div class="telegram-connect-card" id="z2eTelegramConnectCard">
+    <div class="mission-kicker">Retention Engine</div>
+    <h2>📲 Connect Telegram Alerts</h2>
+    <p>Get Daily Command, job alerts, recruiter alerts, streak reminders and upgrade nudges directly in Telegram.</p>
+
+    <div id="telegramStatusLine">
+      <span class="chip">Checking Telegram status...</span>
+    </div>
+
+    <div class="telegram-steps">
+      <div class="telegram-step"><b>1. Open your bot</b><span>Search your Zero2Earn bot in Telegram.</span></div>
+      <div class="telegram-step"><b>2. Send /start</b><span>Bot must receive at least one message.</span></div>
+      <div class="telegram-step"><b>3. Detect Chat ID</b><span>Click Detect below after sending message.</span></div>
+      <div class="telegram-step"><b>4. Connect</b><span>Save chat ID to your Zero2Earn user.</span></div>
+    </div>
+
+    <div class="panel">
+      <h3>Connect Manually</h3>
+      <input id="telegramChatIdInput" placeholder="Paste Telegram chat ID, e.g. 7238244143">
+      <input id="telegramUsernameInput" placeholder="Telegram username optional">
+      <div class="telegram-actions">
+        <button class="green" onclick="z2eConnectTelegramFromInput()">Connect Telegram</button>
+        <button onclick="z2eDetectTelegramChats()">Detect Chat ID</button>
+        <button onclick="z2eSendTelegramTest()">Send Test Alert</button>
+        <button onclick="z2eSendTelegramDaily()">Send Daily Command</button>
+      </div>
+      <p class="small">Tip: If Detect shows empty, open your Telegram bot and send /start or hello first.</p>
+      <div class="telegram-result" id="telegramConnectResult"></div>
+    </div>
+
+    <details class="collapsed-section">
+      <summary>How to find chat ID</summary>
+      <div class="panel">
+        <p>1. Open Telegram bot.</p>
+        <p>2. Send <b>/start</b>.</p>
+        <p>3. Return here and click <b>Detect Chat ID</b>.</p>
+        <p>4. Select your chat ID and click Connect.</p>
+      </div>
+    </details>
+  </div>`;
+}
+
+async function z2eRefreshTelegramConnectStatus(){
+  try{
+    const s = await get("/api/telegram/status/" + userId);
+    const line = document.getElementById("telegramStatusLine");
+    if(!line) return;
+    line.innerHTML = `
+      <span class="chip ${s.bot_configured ? "telegram-status-ok" : "telegram-status-bad"}">Bot: ${s.bot_configured ? "Configured" : "Not configured"}</span>
+      <span class="chip ${s.linked ? "telegram-status-ok" : "telegram-status-bad"}">Account: ${s.linked ? "Linked" : "Not linked"}</span>
+      ${s.chat_id ? `<span class="chip">Chat ID: ${escapeHtml(s.chat_id)}</span>` : ""}
+    `;
+    const inp = document.getElementById("telegramChatIdInput");
+    if(inp && s.chat_id) inp.value = s.chat_id;
+  }catch(e){}
+}
+
+function z2eShowTelegramResult(html){
+  const box = document.getElementById("telegramConnectResult");
+  if(box) box.innerHTML = html;
+}
+
+async function z2eDetectTelegramChats(){
+  try{
+    const d = await get("/api/telegram/detect-chat");
+    if(!d.items || !d.items.length){
+      z2eShowTelegramResult(`<div class="error">No Telegram chat found yet. Open your bot and send /start or hello, then click Detect again.</div>`);
+      return;
+    }
+    z2eShowTelegramResult(`<h3>Detected Telegram Chats</h3>` + d.items.map(c => `
+      <div class="telegram-chat-option">
+        <b>${escapeHtml((c.first_name || "") + " " + (c.last_name || ""))}</b>
+        <p>Chat ID: <b>${escapeHtml(c.chat_id)}</b></p>
+        <p class="small">Last text: ${escapeHtml(c.text || "")}</p>
+        <button class="green" onclick="z2eConnectTelegram('${c.chat_id}','${String(c.username||"").replace(/'/g,"")}')">Connect This Chat</button>
+      </div>
+    `).join(""));
+  }catch(e){
+    z2eShowTelegramResult(`<div class="error">Detect failed: ${escapeHtml(e.message)}</div>`);
+  }
+}
+
+async function z2eConnectTelegram(chatId, username){
+  try{
+    const d = await post("/api/telegram/link/" + userId, fd({chat_id:chatId, username:username || ""}));
+    z2eShowTelegramResult(`<div class="success">✅ Telegram connected: ${escapeHtml(d.chat_id || chatId)}</div>`);
+    z2eRefreshTelegramConnectStatus();
+  }catch(e){
+    z2eShowTelegramResult(`<div class="error">Connect failed: ${escapeHtml(e.message)}</div>`);
+  }
+}
+
+async function z2eConnectTelegramFromInput(){
+  const chatId = document.getElementById("telegramChatIdInput").value.trim();
+  const username = document.getElementById("telegramUsernameInput").value.trim();
+  if(!chatId){
+    z2eShowTelegramResult(`<div class="error">Paste chat ID first, or click Detect Chat ID.</div>`);
+    return;
+  }
+  await z2eConnectTelegram(chatId, username);
+}
+
+async function z2eSendTelegramTest(){
+  try{
+    const d = await post("/api/telegram/test/" + userId, fd({}));
+    z2eShowTelegramResult(`<div class="success">Test alert sent. Telegram response: ${escapeHtml(JSON.stringify(d))}</div>`);
+  }catch(e){
+    z2eShowTelegramResult(`<div class="error">Test failed: ${escapeHtml(e.message)}</div>`);
+  }
+}
+
+async function z2eSendTelegramDaily(){
+  try{
+    const d = await post("/api/notifications/daily-command/" + userId, fd({}));
+    z2eShowTelegramResult(`<div class="success">Daily command sent. Response: ${escapeHtml(JSON.stringify(d))}</div>`);
+  }catch(e){
+    z2eShowTelegramResult(`<div class="error">Daily command failed: ${escapeHtml(e.message)}</div>`);
+  }
+}
+
+function z2eInjectTelegramConnectUI(pageId){
+  const target = document.getElementById(pageId);
+  if(!target || document.getElementById("z2eTelegramConnectCard")) return;
+  target.insertAdjacentHTML("beforeend", z2eTelegramConnectCard());
+  z2eRefreshTelegramConnectStatus();
+}
+
+function z2eWrapTelegramPages(){
+  if(window.__z2eTelegramConnectWrapped) return;
+  window.__z2eTelegramConnectWrapped = true;
+  const oldShow = window.showPage;
+  window.showPage = function(id){
+    oldShow(id);
+    if(id === "plans" || id === "home"){
+      setTimeout(()=>z2eInjectTelegramConnectUI(id), 600);
+    }
+  };
+}
+
+document.addEventListener("DOMContentLoaded", function(){
+  setTimeout(z2eWrapTelegramPages, 400);
+});
+</script>
+
+
+<script id="z2eNonInvasiveApiDebug">
+window.addEventListener("error", function(e){
+  console.error("Zero2Earn frontend error:", e.message, e.filename, e.lineno);
+});
+</script>
+
+
+<script id="z2eRazorpayLivePaymentFlow">
+async function z2eGetBillingStatus(){
+  try{return await get("/api/billing/status/" + userId);}catch(e){return null;}
+}
+function z2ePaymentResult(msg){
+  const box=document.getElementById("z2ePaymentResult");
+  if(box) box.innerHTML=msg;
+}
+function z2eProPaymentCard(){
+  return `<div class="z2e-payment-card" id="z2eProPaymentCard">
+    <div class="mission-kicker">Revenue Engine</div>
+    <h2>🚀 Unlock Zero2Earn Pro</h2>
+    <p>₹10/day to build your Daily ₹500 execution system. Unlock unlimited Wingman, recruiter visibility, stronger job flow, and Telegram alerts.</p>
+    <div class="z2e-payment-grid">
+      <div class="z2e-payment-feature"><b>Unlimited AI Wingman</b><span>Proposal, cover letter, follow-up and interview pitch.</span></div>
+      <div class="z2e-payment-feature"><b>Daily ₹500 Mode</b><span>Structured earning command loop.</span></div>
+      <div class="z2e-payment-feature"><b>Recruiter Visibility</b><span>Talent proof and readiness boost.</span></div>
+      <div class="z2e-payment-feature"><b>Telegram Alerts</b><span>Daily command, job and recruiter reminders.</span></div>
+    </div>
+    <span class="chip">₹299/month</span><span class="chip">Live Razorpay</span><span class="chip">Secure verification</span><br><br>
+    <button class="green primary-big" onclick="startRazorpayCheckout()">🚀 Upgrade to Pro ₹299</button>
+    <button onclick="z2eRefreshBillingCard()">Check Pro Status</button>
+    <div id="z2ePaymentResult" style="margin-top:12px"></div>
+  </div>`;
+}
+function z2eInjectPaymentCard(pageId){
+  const target=document.getElementById(pageId);
+  if(!target || document.getElementById("z2eProPaymentCard")) return;
+  target.insertAdjacentHTML("afterbegin", z2eProPaymentCard());
+  setTimeout(z2eRefreshBillingCard,300);
+}
+function z2eStickyUpgrade(){
+  if(document.getElementById("z2eUpgradeSticky")) return;
+  const div=document.createElement("div");
+  div.id="z2eUpgradeSticky";
+  div.className="z2e-upgrade-sticky";
+  div.innerHTML=`<button class="green" onclick="startRazorpayCheckout()">🚀 Upgrade ₹299</button>`;
+  document.body.appendChild(div);
+}
+async function z2eRefreshBillingCard(){
+  const status=await z2eGetBillingStatus();
+  const sticky=document.getElementById("z2eUpgradeSticky");
+  if(!status){z2ePaymentResult(`<div class="error">Could not load billing status.</div>`);return;}
+  if(status.is_pro){
+    if(sticky) sticky.style.display="none";
+    z2ePaymentResult(`<div class="success">✅ Pro active. Plan: ${escapeHtml(status.plan || "pro")}</div>`);
+    const userPlan=document.getElementById("userPlan");
+    if(userPlan) userPlan.innerText="Plan: pro";
+  }else{
+    if(sticky) sticky.style.display="block";
+    z2ePaymentResult(`<div class="small">Current plan: ${escapeHtml(status.plan || "free")} · Price: ₹${escapeHtml(String(status.price_rupees || 299))}/month</div>`);
+  }
+}
+async function startRazorpayCheckout(){
+  try{
+    if(!userId){alert("Please login first.");return;}
+    const order=await post("/api/payment/create-order/" + userId, fd({}));
+    if(!window.Razorpay){alert("Razorpay checkout script not loaded. Refresh and try again.");return;}
+    const rz=new Razorpay({
+      key:order.key_id, amount:order.amount, currency:order.currency || "INR",
+      name:"Zero2Earn Pro", description:"Monthly Pro Plan", order_id:order.order_id,
+      handler:async function(response){
+        try{
+          z2ePaymentResult(`<div class="small">Verifying payment...</div>`);
+          const verified=await post("/api/payment/verify/" + userId, fd({
+            razorpay_order_id:response.razorpay_order_id,
+            razorpay_payment_id:response.razorpay_payment_id,
+            razorpay_signature:response.razorpay_signature
+          }));
+          alert(verified.message || "Payment verified. Pro activated.");
+          const userPlan=document.getElementById("userPlan");
+          if(userPlan) userPlan.innerText="Plan: pro";
+          localStorage.setItem("z2e_plan","pro");
+          await z2eRefreshBillingCard();
+          showPage("first100");
+        }catch(e){
+          alert("Payment verification failed: " + e.message);
+          z2ePaymentResult(`<div class="error">Payment verification failed: ${escapeHtml(e.message)}</div>`);
+        }
+      },
+      modal:{ondismiss:function(){z2ePaymentResult(`<div class="small">Payment window closed. You can upgrade anytime.</div>`);}},
+      theme:{color:"#16a34a"}
+    });
+    rz.open();
+  }catch(e){
+    alert("Checkout failed: " + e.message);
+    z2ePaymentResult(`<div class="error">Checkout failed: ${escapeHtml(e.message)}</div>`);
+  }
+}
+function z2eWrapPaymentPages(){
+  if(window.__z2ePaymentWrapped) return;
+  window.__z2ePaymentWrapped=true;
+  const oldShowPage=window.showPage;
+  window.showPage=function(id){
+    oldShowPage(id);
+    setTimeout(z2eRefreshBillingCard,500);
+    if(id==="plans") setTimeout(()=>z2eInjectPaymentCard("plans"),450);
+    if(id==="wingman") setTimeout(()=>z2eInjectPaymentCard("wingman"),700);
+    if(id==="daily500") setTimeout(async()=>{const s=await z2eGetBillingStatus(); if(s && !s.is_pro){const el=document.getElementById("daily500"); if(el && !document.getElementById("z2eProPaymentCard")) el.insertAdjacentHTML("afterbegin",z2eProPaymentCard());}},500);
+  };
+}
+function z2eSetUserSessionFromResponse(data){
+  try{
+    if(data && data.user && data.user.id){
+      userId=data.user.id; localStorage.setItem("z2e_user_id",data.user.id); localStorage.setItem("z2e_user_email",data.user.email || "");
+      if(data.user.plan) localStorage.setItem("z2e_plan",data.user.plan);
+    }else if(data && data.user_id){
+      userId=data.user_id; localStorage.setItem("z2e_user_id",data.user_id); localStorage.setItem("z2e_user_email",data.email || "");
+    }
+  }catch(e){}
+}
+document.addEventListener("DOMContentLoaded",function(){
+  setTimeout(z2eWrapPaymentPages,300);
+  setTimeout(async()=>{const s=await z2eGetBillingStatus(); if(s && !s.is_pro) z2eStickyUpgrade(); await z2eRefreshBillingCard();},900);
+});
+</script>
+
+
+<script id="z2eTelegramEngineFullUI">
+function z2eTelegramEngineCard(){
+  return `<div class="z2e-telegram-engine" id="z2eTelegramEngineCard">
+    <div class="mission-kicker">Retention Engine</div>
+    <h2>📲 Telegram Engine</h2>
+    <p>Connect Telegram for Daily Command, job alerts, recruiter alerts and Pro conversion nudges.</p>
+    <div id="z2eTelegramStatusLine"><span class="chip">Checking...</span></div>
+    <div class="z2e-telegram-grid">
+      <div class="z2e-telegram-box"><b>Daily Command</b><br><span>Morning/evening earning reminders.</span></div>
+      <div class="z2e-telegram-box"><b>Job Alerts</b><br><span>High-match opportunities pushed to user.</span></div>
+      <div class="z2e-telegram-box"><b>Recruiter Alerts</b><br><span>Hiring/talent activity reminders.</span></div>
+      <div class="z2e-telegram-box"><b>Upgrade Nudges</b><br><span>Conversion moments after value is shown.</span></div>
+    </div>
+    <div class="panel">
+      <h3>Connect Telegram</h3>
+      <input id="z2eTelegramChatId" placeholder="Telegram chat ID, e.g. 7238244143">
+      <input id="z2eTelegramUsername" placeholder="Telegram username optional">
+      <div class="z2e-telegram-actions">
+        <button class="green" onclick="z2eTelegramConnectManual()">Connect</button>
+        <button onclick="z2eTelegramDetect()">Detect Chat ID</button>
+        <button onclick="z2eTelegramTest()">Send Test</button>
+        <button onclick="z2eTelegramDaily()">Daily Command</button>
+        <button onclick="z2eTelegramJob()">Job Alert</button>
+        <button onclick="z2eTelegramRecruiter()">Recruiter Alert</button>
+        <button onclick="z2eTelegramUpgrade()">Upgrade Nudge</button>
+      </div>
+      <p class="small">User step: Open bot → send /start → return here → Detect Chat ID → Connect.</p>
+      <div id="z2eTelegramResult"></div>
+    </div>
+  </div>`;
+}
+function z2eTelegramResult(html){const box=document.getElementById("z2eTelegramResult"); if(box) box.innerHTML=html;}
+async function z2eTelegramRefresh(){
+  try{
+    const s=await get("/api/telegram/engine/status/" + userId);
+    const line=document.getElementById("z2eTelegramStatusLine");
+    if(line) line.innerHTML=`<span class="chip">Bot: ${s.bot_configured?"Configured ✅":"Missing ❌"}</span><span class="chip">Account: ${s.linked?"Linked ✅":"Not linked ❌"}</span>${s.chat_id?`<span class="chip">Chat ID: ${escapeHtml(s.chat_id)}</span>`:""}`;
+    const inp=document.getElementById("z2eTelegramChatId"); if(inp && s.chat_id) inp.value=s.chat_id;
+  }catch(e){z2eTelegramResult(`<div class="error">Telegram status failed: ${escapeHtml(e.message)}</div>`);}
+}
+async function z2eTelegramDetect(){
+  try{
+    const d=await get("/api/telegram/detect-chat");
+    if(!d.items || !d.items.length){z2eTelegramResult(`<div class="error">No chat detected. Open bot and send /start first.</div>`);return;}
+    z2eTelegramResult(`<h3>Detected Chats</h3>` + d.items.map(c=>`<div class="z2e-chat-option"><b>${escapeHtml((c.first_name||"")+" "+(c.last_name||""))}</b><p>Chat ID: <b>${escapeHtml(c.chat_id)}</b></p><p class="small">Last text: ${escapeHtml(c.text||"")}</p><button class="green" onclick="z2eTelegramConnect('${c.chat_id}','${String(c.username||"").replace(/'/g,"")}')">Connect This Chat</button></div>`).join(""));
+  }catch(e){z2eTelegramResult(`<div class="error">Detect failed: ${escapeHtml(e.message)}</div>`);}
+}
+async function z2eTelegramConnect(chatId, username){
+  try{const d=await post("/api/telegram/link/"+userId, fd({chat_id:chatId, username:username||""})); z2eTelegramResult(`<div class="success">✅ Telegram connected: ${escapeHtml(d.chat_id||chatId)}</div>`); z2eTelegramRefresh();}
+  catch(e){z2eTelegramResult(`<div class="error">Connect failed: ${escapeHtml(e.message)}</div>`);}
+}
+async function z2eTelegramConnectManual(){
+  const chatId=document.getElementById("z2eTelegramChatId").value.trim();
+  const username=document.getElementById("z2eTelegramUsername").value.trim();
+  if(!chatId){z2eTelegramResult(`<div class="error">Paste chat ID or click Detect Chat ID.</div>`);return;}
+  await z2eTelegramConnect(chatId, username);
+}
+async function z2eTelegramAction(path,label){
+  try{const d=await post(path+userId, fd({})); z2eTelegramResult(`<div class="success">${label} sent: ${escapeHtml(JSON.stringify(d))}</div>`); z2eTelegramRefresh();}
+  catch(e){z2eTelegramResult(`<div class="error">${label} failed: ${escapeHtml(e.message)}</div>`);}
+}
+async function z2eTelegramTest(){await z2eTelegramAction("/api/telegram/test/","Test alert");}
+async function z2eTelegramDaily(){await z2eTelegramAction("/api/telegram/send/daily/","Daily command");}
+async function z2eTelegramJob(){await z2eTelegramAction("/api/telegram/send/job/","Job alert");}
+async function z2eTelegramRecruiter(){await z2eTelegramAction("/api/telegram/send/recruiter/","Recruiter alert");}
+async function z2eTelegramUpgrade(){await z2eTelegramAction("/api/telegram/send/upgrade/","Upgrade nudge");}
+function z2eInjectTelegramEngine(pageId){const target=document.getElementById(pageId); if(!target || document.getElementById("z2eTelegramEngineCard")) return; target.insertAdjacentHTML("beforeend", z2eTelegramEngineCard()); setTimeout(z2eTelegramRefresh,300);}
+function z2eWrapTelegramEnginePages(){if(window.__z2eTelegramEngineWrapped) return; window.__z2eTelegramEngineWrapped=true; const oldShowPage=window.showPage; window.showPage=function(id){oldShowPage(id); if(id==="plans"||id==="home"||id==="automation"){setTimeout(()=>z2eInjectTelegramEngine(id),700);}};}
+document.addEventListener("DOMContentLoaded",function(){setTimeout(z2eWrapTelegramEnginePages,500);});
+</script>
+
+
+<script id="z2eTelegramIntelligenceUI">
+function z2eTelegramIntelCard(){
+  return `<div class="z2e-intel-card" id="z2eTelegramIntelCard">
+    <div class="mission-kicker">Smart Retention</div>
+    <h2>🧠 Telegram Intelligence</h2>
+    <p>Smart alerts choose the best message based on user progress, plan, AI usage, tasks and cooldowns.</p>
+    <div class="z2e-intel-grid">
+      <div class="z2e-intel-box"><b>Anti-spam</b><br><span>Global and per-alert cooldowns.</span></div>
+      <div class="z2e-intel-box"><b>Context-aware</b><br><span>₹100 progress, AI usage, tasks and plan.</span></div>
+      <div class="z2e-intel-box"><b>Conversion-aware</b><br><span>Upgrade only after value signals.</span></div>
+      <div class="z2e-intel-box"><b>Action-first</b><br><span>Every alert points to one next action.</span></div>
+    </div>
+    <div class="z2e-telegram-actions">
+      <button class="green" onclick="z2eIntelRun()">Run Smart Alert Now</button>
+      <button onclick="z2eIntelStatus()">Check Intelligence Status</button>
+      <button onclick="z2eIntelQuiet()">Quiet 24h</button>
+    </div>
+    <div id="z2eIntelResult"></div>
+  </div>`;
+}
+function z2eIntelResult(html){const box=document.getElementById("z2eIntelResult"); if(box) box.innerHTML=html;}
+async function z2eIntelStatus(){
+  try{
+    const d=await get("/api/telegram/intelligence/status/"+userId);
+    z2eIntelResult(`<div class="panel"><h3>Next decision: ${escapeHtml(d.next_decision.kind)} (${escapeHtml(String(d.next_decision.score))})</h3><p>${escapeHtml(d.next_decision.reason)}</p><pre>${escapeHtml(JSON.stringify(d.next_decision,null,2))}</pre></div>`);
+  }catch(e){z2eIntelResult(`<div class="error">Status failed: ${escapeHtml(e.message)}</div>`);}
+}
+async function z2eIntelRun(){
+  try{
+    const d=await post("/api/telegram/intelligence/run/"+userId, fd({}));
+    z2eIntelResult(`<div class="${d.sent?'success':'error'}">Smart alert result: ${escapeHtml(JSON.stringify(d))}</div>`);
+  }catch(e){z2eIntelResult(`<div class="error">Smart alert failed: ${escapeHtml(e.message)}</div>`);}
+}
+async function z2eIntelQuiet(){
+  try{
+    const d=await post("/api/telegram/intelligence/quiet/"+userId, fd({hours:24}));
+    z2eIntelResult(`<div class="success">Quiet mode enabled until ${escapeHtml(d.quiet_until)}</div>`);
+  }catch(e){z2eIntelResult(`<div class="error">Quiet failed: ${escapeHtml(e.message)}</div>`);}
+}
+function z2eInjectTelegramIntel(pageId){
+  const target=document.getElementById(pageId);
+  if(!target || document.getElementById("z2eTelegramIntelCard")) return;
+  target.insertAdjacentHTML("beforeend", z2eTelegramIntelCard());
+}
+function z2eWrapTelegramIntelPages(){
+  if(window.__z2eTelegramIntelWrapped) return;
+  window.__z2eTelegramIntelWrapped=true;
+  const oldShowPage=window.showPage;
+  window.showPage=function(id){
+    oldShowPage(id);
+    if(id==="plans"||id==="automation"){setTimeout(()=>z2eInjectTelegramIntel(id),900);}
+  };
+}
+document.addEventListener("DOMContentLoaded",function(){setTimeout(z2eWrapTelegramIntelPages,700);});
+</script>
+
 </body>
 </html>

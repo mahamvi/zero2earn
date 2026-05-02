@@ -3278,3 +3278,224 @@ def telegram_opt_in(user_id: int, enabled: int = Form(1)):
     conn.commit()
     conn.close()
     return {"status": "updated", "notification_opt_in": 1 if int(enabled or 0) else 0}
+
+
+
+
+# ---------------- TELEGRAM ENGINE FULL ----------------
+
+def ensure_telegram_engine_tables():
+    conn = db()
+    cur = conn.cursor()
+    for col, definition in {
+        "telegram_chat_id": "TEXT DEFAULT ''",
+        "telegram_username": "TEXT DEFAULT ''",
+        "notification_opt_in": "INTEGER DEFAULT 1",
+        "last_daily_alert_at": "TEXT DEFAULT ''",
+        "last_job_alert_at": "TEXT DEFAULT ''",
+        "last_recruiter_alert_at": "TEXT DEFAULT ''",
+        "last_upgrade_nudge_at": "TEXT DEFAULT ''"
+    }.items():
+        try:
+            add_column(cur, "users", col, definition)
+        except Exception:
+            pass
+    cur.execute("""
+    CREATE TABLE IF NOT EXISTS telegram_events (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER,
+        event_type TEXT DEFAULT '',
+        message TEXT DEFAULT '',
+        status TEXT DEFAULT '',
+        response TEXT DEFAULT '',
+        created_at TEXT DEFAULT ''
+    )
+    """)
+    conn.commit()
+    conn.close()
+
+def telegram_ready():
+    return bool(os.getenv("TELEGRAM_BOT_TOKEN"))
+
+def telegram_api_url(method: str):
+    return f"https://api.telegram.org/bot{os.getenv('TELEGRAM_BOT_TOKEN','')}/{method}"
+
+def telegram_send_raw(chat_id: str, message: str):
+    if not telegram_ready():
+        return {"sent": False, "reason": "TELEGRAM_BOT_TOKEN missing"}
+    if not chat_id:
+        return {"sent": False, "reason": "chat_id missing"}
+    try:
+        resp = requests.post(telegram_api_url("sendMessage"), json={
+            "chat_id": chat_id,
+            "text": message,
+            "parse_mode": "HTML",
+            "disable_web_page_preview": True
+        }, timeout=12)
+        return {"sent": resp.status_code == 200, "status_code": resp.status_code, "response": resp.text[:700]}
+    except Exception as e:
+        return {"sent": False, "reason": str(e)[:700]}
+
+def telegram_log(user_id: int, event_type: str, message: str, result: dict):
+    ensure_telegram_engine_tables()
+    conn = db()
+    conn.execute("""
+    INSERT INTO telegram_events (user_id, event_type, message, status, response, created_at)
+    VALUES (?, ?, ?, ?, ?, ?)
+    """, (user_id, event_type, message, "sent" if result.get("sent") else "failed", json.dumps(result, ensure_ascii=False)[:900], now()))
+    conn.commit()
+    conn.close()
+
+def telegram_send_user(user_id: int, message: str, event_type: str = "general"):
+    ensure_telegram_engine_tables()
+    user = get_user(user_id)
+    if int(user.get("notification_opt_in") or 1) != 1:
+        result = {"sent": False, "reason": "user opted out"}
+        telegram_log(user_id, event_type, message, result)
+        return result
+    result = telegram_send_raw(user.get("telegram_chat_id", ""), message)
+    telegram_log(user_id, event_type, message, result)
+    return result
+
+def telegram_daily_message(user_id: int):
+    user = get_user(user_id)
+    target = int(user.get("goal_daily", 500) or 500)
+    name = user.get("name") or "Zero2Earn user"
+    return f"""🔥 <b>Zero2Earn Daily Command</b>
+
+Hi {name},
+Today’s target: <b>₹{target}</b>
+
+1) Complete 1 micro-income action
+2) Prepare 1 job with Wingman
+3) Apply and mark tracked
+4) Add proof or progress
+
+Open Zero2Earn and continue now."""
+
+def telegram_job_message(user_id: int):
+    user = get_user(user_id)
+    try:
+        jobs = build_job_cards(user)
+        job = jobs[0] if jobs else {}
+    except Exception:
+        job = {}
+    return f"""💼 <b>New Job Match</b>
+
+<b>{job.get('title','New matched job')}</b>
+{job.get('company','Zero2Earn Jobs Engine')}
+Match score: {job.get('score','')}%
+
+Open Zero2Earn → Jobs Engine → Wingman."""
+
+def telegram_recruiter_message(user_id: int, company: str = "Recruiter", role: str = "your profile"):
+    return f"""🏢 <b>Recruiter Alert</b>
+
+{company} activity for:
+<b>{role}</b>
+
+Open Zero2Earn → Talent Pool / Recruiter Hiring."""
+
+def telegram_upgrade_message(user_id: int):
+    try:
+        trigger = upgrade_trigger_for_user(user_id)
+        msg = trigger.get("message", "Unlock Pro to continue your earning workflow.")
+    except Exception:
+        msg = "Unlock Pro to continue your earning workflow."
+    return f"""🚀 <b>Zero2Earn Pro</b>
+
+{msg}
+
+Pro unlocks:
+• Unlimited AI Wingman
+• Daily ₹500 execution
+• Recruiter visibility boost
+• Telegram retention alerts
+
+Open Plans → Upgrade ₹299."""
+
+@app.get("/api/telegram/engine/status/{user_id}")
+def telegram_engine_status(user_id: int):
+    ensure_telegram_engine_tables()
+    user = get_user(user_id)
+    conn = db()
+    events = rows_to_dicts(conn.execute("SELECT * FROM telegram_events WHERE user_id=? ORDER BY id DESC LIMIT 10", (user_id,)).fetchall())
+    conn.close()
+    return {
+        "bot_configured": telegram_ready(),
+        "linked": bool(user.get("telegram_chat_id","")),
+        "chat_id": user.get("telegram_chat_id",""),
+        "username": user.get("telegram_username",""),
+        "notification_opt_in": int(user.get("notification_opt_in") or 1),
+        "recent_events": events
+    }
+
+@app.get("/api/telegram/detect-chat")
+def telegram_detect_chat():
+    if not telegram_ready():
+        raise HTTPException(status_code=500, detail="TELEGRAM_BOT_TOKEN missing")
+    resp = requests.get(telegram_api_url("getUpdates"), timeout=12)
+    data = resp.json()
+    chats = []
+    for item in data.get("result", []):
+        msg = item.get("message", {}) or item.get("edited_message", {})
+        chat = msg.get("chat", {})
+        if chat.get("id"):
+            chats.append({
+                "chat_id": str(chat.get("id")),
+                "first_name": chat.get("first_name",""),
+                "last_name": chat.get("last_name",""),
+                "username": chat.get("username",""),
+                "text": msg.get("text","")
+            })
+    seen=set(); unique=[]
+    for c in reversed(chats):
+        if c["chat_id"] not in seen:
+            unique.append(c); seen.add(c["chat_id"])
+    return {"count": len(unique), "items": unique[:10], "raw_ok": data.get("ok", False)}
+
+@app.post("/api/telegram/link/{user_id}")
+def telegram_link_user(user_id: int, chat_id: str = Form(...), username: str = Form("")):
+    ensure_telegram_engine_tables()
+    get_user(user_id)
+    conn = db()
+    conn.execute("UPDATE users SET telegram_chat_id=?, telegram_username=?, notification_opt_in=1 WHERE id=?", (chat_id.strip(), username.strip(), user_id))
+    conn.commit(); conn.close()
+    result = telegram_send_user(user_id, "✅ Zero2Earn Telegram connected. Daily command, job alerts and recruiter alerts are active.", "telegram_linked")
+    return {"status": "linked", "chat_id": chat_id, "telegram": result}
+
+@app.post("/api/telegram/test/{user_id}")
+def telegram_test_user(user_id: int):
+    return telegram_send_user(user_id, "🔥 Zero2Earn test alert working. Telegram Engine is live.", "test")
+
+@app.post("/api/telegram/send/daily/{user_id}")
+def telegram_send_daily(user_id: int):
+    result = telegram_send_user(user_id, telegram_daily_message(user_id), "daily_command")
+    conn=db(); conn.execute("UPDATE users SET last_daily_alert_at=? WHERE id=?", (now(), user_id)); conn.commit(); conn.close()
+    return result
+
+@app.post("/api/telegram/send/job/{user_id}")
+def telegram_send_job(user_id: int):
+    result = telegram_send_user(user_id, telegram_job_message(user_id), "job_alert")
+    conn=db(); conn.execute("UPDATE users SET last_job_alert_at=? WHERE id=?", (now(), user_id)); conn.commit(); conn.close()
+    return result
+
+@app.post("/api/telegram/send/recruiter/{user_id}")
+def telegram_send_recruiter(user_id: int, company: str = Form("Recruiter"), role: str = Form("your profile")):
+    result = telegram_send_user(user_id, telegram_recruiter_message(user_id, company, role), "recruiter_alert")
+    conn=db(); conn.execute("UPDATE users SET last_recruiter_alert_at=? WHERE id=?", (now(), user_id)); conn.commit(); conn.close()
+    return result
+
+@app.post("/api/telegram/send/upgrade/{user_id}")
+def telegram_send_upgrade(user_id: int):
+    result = telegram_send_user(user_id, telegram_upgrade_message(user_id), "upgrade_nudge")
+    conn=db(); conn.execute("UPDATE users SET last_upgrade_nudge_at=? WHERE id=?", (now(), user_id)); conn.commit(); conn.close()
+    return result
+
+@app.get("/api/telegram/events/{user_id}")
+def telegram_events_user(user_id: int):
+    ensure_telegram_engine_tables()
+    conn=db()
+    events=rows_to_dicts(conn.execute("SELECT * FROM telegram_events WHERE user_id=? ORDER BY id DESC LIMIT 50", (user_id,)).fetchall())
+    conn.close()
+    return {"items": events}

@@ -3502,48 +3502,349 @@ def telegram_events_user(user_id: int):
     events=rows_to_dicts(conn.execute("SELECT * FROM telegram_events WHERE user_id=? ORDER BY id DESC LIMIT 50", (user_id,)).fetchall())
     conn.close()
     return {"items": events}
-    import threading, time
 
-def telegram_scheduler_loop():
-    print("🚀 Telegram Scheduler Started")
 
-    while True:
+
+
+# ---------------- TELEGRAM INTELLIGENCE ENGINE ----------------
+
+def ensure_telegram_intelligence_tables():
+    ensure_telegram_engine_tables()
+    conn = db()
+    cur = conn.cursor()
+    cur.execute("""
+    CREATE TABLE IF NOT EXISTS telegram_intelligence_state (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER UNIQUE,
+        last_smart_daily_at TEXT DEFAULT '',
+        last_smart_job_at TEXT DEFAULT '',
+        last_smart_upgrade_at TEXT DEFAULT '',
+        last_smart_inactivity_at TEXT DEFAULT '',
+        last_any_smart_alert_at TEXT DEFAULT '',
+        quiet_until TEXT DEFAULT '',
+        created_at TEXT DEFAULT ''
+    )
+    """)
+    cur.execute("""
+    CREATE TABLE IF NOT EXISTS telegram_smart_decisions (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER,
+        decision_type TEXT DEFAULT '',
+        decision TEXT DEFAULT '',
+        reason TEXT DEFAULT '',
+        score INTEGER DEFAULT 0,
+        message TEXT DEFAULT '',
+        sent INTEGER DEFAULT 0,
+        created_at TEXT DEFAULT ''
+    )
+    """)
+    conn.commit()
+    conn.close()
+
+def tg_parse_dt(value):
+    if not value:
+        return None
+    try:
+        return datetime.fromisoformat(value)
+    except Exception:
+        return None
+
+def tg_hours_since(value):
+    dt = tg_parse_dt(value)
+    if not dt:
+        return 9999
+    return (datetime.now() - dt).total_seconds() / 3600
+
+def telegram_get_intel_state(user_id: int):
+    ensure_telegram_intelligence_tables()
+    conn = db()
+    row = conn.execute("SELECT * FROM telegram_intelligence_state WHERE user_id=?", (user_id,)).fetchone()
+    if not row:
+        conn.execute("""
+        INSERT INTO telegram_intelligence_state (user_id, created_at)
+        VALUES (?, ?)
+        """, (user_id, now()))
+        conn.commit()
+        row = conn.execute("SELECT * FROM telegram_intelligence_state WHERE user_id=?", (user_id,)).fetchone()
+    conn.close()
+    return dict(row)
+
+def telegram_set_intel_state(user_id: int, field: str):
+    allowed = {
+        "last_smart_daily_at",
+        "last_smart_job_at",
+        "last_smart_upgrade_at",
+        "last_smart_inactivity_at",
+        "last_any_smart_alert_at"
+    }
+    if field not in allowed:
+        return
+    ensure_telegram_intelligence_tables()
+    conn = db()
+    conn.execute(f"UPDATE telegram_intelligence_state SET {field}=?, last_any_smart_alert_at=? WHERE user_id=?", (now(), now(), user_id))
+    conn.commit()
+    conn.close()
+
+def telegram_log_decision(user_id: int, decision_type: str, decision: str, reason: str, score: int, message: str, sent: bool):
+    ensure_telegram_intelligence_tables()
+    conn = db()
+    conn.execute("""
+    INSERT INTO telegram_smart_decisions (user_id, decision_type, decision, reason, score, message, sent, created_at)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    """, (user_id, decision_type, decision, reason, int(score), message, 1 if sent else 0, now()))
+    conn.commit()
+    conn.close()
+
+def telegram_user_activity_snapshot(user_id: int):
+    user = get_user(user_id)
+    try:
+        dash = dashboard(user_id)
+    except Exception:
+        dash = {}
+    metrics = dash.get("metrics", {}) if isinstance(dash, dict) else {}
+    tracking = dash.get("tracking", {}) if isinstance(dash, dict) else {}
+    try:
+        first100 = calculate_first100_summary(user_id)
+    except Exception:
+        first100 = {}
+    try:
+        billing = billing_status(user_id)
+    except Exception:
+        billing = {"is_pro": is_pro_user(user)}
+    try:
+        ai_used = ai_usage_today(user_id, "wingman")
+    except Exception:
+        ai_used = 0
+    return {
+        "user": user,
+        "metrics": metrics,
+        "tracking": tracking,
+        "first100": first100,
+        "billing": billing,
+        "ai_used": ai_used,
+        "is_pro": bool(billing.get("is_pro")),
+        "goal": int(user.get("goal_daily", 500) or 500),
+        "name": user.get("name") or "Zero2Earn user",
+        "pending_tasks": int(metrics.get("pending_tasks", 0) or 0),
+        "done_tasks": int(metrics.get("done_tasks", 0) or 0),
+        "applications": int(metrics.get("jobs_applied", 0) or 0),
+        "earned": int(metrics.get("total_earned", 0) or 0),
+        "first100_progress": int(first100.get("progress_percent", 0) or 0),
+        "first100_completed": bool(first100.get("completed", False)),
+        "next_action": first100.get("next_action", "Open First ₹100 Mission")
+    }
+
+def telegram_should_send(user_id: int, decision_type: str):
+    state = telegram_get_intel_state(user_id)
+    quiet_until = tg_parse_dt(state.get("quiet_until"))
+    if quiet_until and quiet_until > datetime.now():
+        return False, "quiet_mode_active"
+
+    # Global anti-spam: no more than 1 smart alert every 3 hours.
+    if tg_hours_since(state.get("last_any_smart_alert_at")) < 3:
+        return False, "global_cooldown"
+
+    cooldowns = {
+        "daily": ("last_smart_daily_at", 10),
+        "job": ("last_smart_job_at", 8),
+        "upgrade": ("last_smart_upgrade_at", 18),
+        "inactivity": ("last_smart_inactivity_at", 12),
+    }
+    field, hours = cooldowns.get(decision_type, ("last_any_smart_alert_at", 6))
+    if tg_hours_since(state.get(field)) < hours:
+        return False, f"{decision_type}_cooldown"
+    return True, "ok"
+
+def telegram_build_smart_message(user_id: int, kind: str):
+    snap = telegram_user_activity_snapshot(user_id)
+    name = snap["name"]
+    target = snap["goal"]
+    next_action = snap["next_action"]
+    progress = snap["first100_progress"]
+    is_pro = snap["is_pro"]
+    ai_used = snap["ai_used"]
+
+    if kind == "daily":
+        if snap["first100_completed"]:
+            return f"""🔥 <b>{name}, today’s ₹{target} command is ready</b>
+
+You already started the system.
+Do this now:
+1) Prepare 1 strong job with Wingman
+2) Apply on official portal
+3) Track proof or follow-up
+
+Your next action: <b>{next_action}</b>"""
+        return f"""🔥 <b>{name}, start your First ₹100 Mission</b>
+
+Progress: <b>{progress}%</b>
+Next action: <b>{next_action}</b>
+
+Do only one small step now.
+Avoid scams. Never pay to apply."""
+
+    if kind == "job":
         try:
-            conn = db()
-            users = rows_to_dicts(conn.execute(
-                "SELECT id FROM users WHERE telegram_chat_id!='' AND notification_opt_in=1"
-            ).fetchall())
-            conn.close()
+            user = get_user(user_id)
+            jobs = build_job_cards(user)
+            job = jobs[0] if jobs else {}
+        except Exception:
+            job = {}
+        return f"""💼 <b>Smart Job Alert</b>
 
-            for u in users:
-                uid = u["id"]
+Best next match:
+<b>{job.get('title','Resume-matched opportunity')}</b>
+{job.get('company','Zero2Earn Jobs Engine')}
+Score: {job.get('score','')}%
 
-                # Morning Daily Command
-                telegram_send_daily(uid)
+Open Zero2Earn → Jobs → Wingman.
+Prepare before applying."""
 
-                # Job alert
-                telegram_send_job(uid)
+    if kind == "upgrade":
+        if is_pro:
+            return ""
+        if ai_used >= max(1, free_ai_limit() - 1):
+            reason = "You are near your free AI Wingman limit."
+        elif snap["first100_progress"] >= 60:
+            reason = "You are close to first proof. Pro helps scale to Daily ₹500."
+        else:
+            reason = "Pro unlocks faster execution."
+        return f"""🚀 <b>Scale Zero2Earn with Pro</b>
 
-                # Upgrade nudge (only free users)
-                try:
-                    status = billing_status(uid)
-                    if not status.get("is_pro"):
-                        telegram_send_upgrade(uid)
-                except:
-                    pass
+{reason}
 
-            # run every 6 hours
-            time.sleep(21600)
+Unlock:
+• Unlimited AI Wingman
+• Daily ₹500 Mode
+• Recruiter visibility
+• Stronger follow-up flow
 
+₹299/month = about ₹10/day."""
+
+    if kind == "inactivity":
+        return f"""⚡ <b>Your Zero2Earn streak is waiting</b>
+
+You don’t need to finish everything.
+Just complete <b>one</b> action:
+
+Next action: <b>{next_action}</b>
+
+Open Zero2Earn and protect momentum."""
+
+    return ""
+
+def telegram_smart_decide(user_id: int):
+    snap = telegram_user_activity_snapshot(user_id)
+    decisions = []
+
+    # Daily score
+    daily_score = 50
+    if snap["pending_tasks"] > 0:
+        daily_score += 20
+    if snap["first100_progress"] < 100:
+        daily_score += 20
+    decisions.append(("daily", daily_score, "daily command keeps retention"))
+
+    # Job score
+    job_score = 35
+    if snap["applications"] == 0:
+        job_score += 25
+    if snap["first100_progress"] >= 20:
+        job_score += 10
+    decisions.append(("job", job_score, "job alert supports apply behavior"))
+
+    # Upgrade score
+    upgrade_score = 0
+    if not snap["is_pro"]:
+        upgrade_score = 40
+        if snap["ai_used"] >= max(1, free_ai_limit() - 1):
+            upgrade_score += 30
+        if snap["first100_progress"] >= 60:
+            upgrade_score += 25
+    decisions.append(("upgrade", upgrade_score, "upgrade shown only after value signal"))
+
+    # Inactivity score: simple proxy based on pending tasks/done zero
+    inactivity_score = 30
+    if snap["done_tasks"] == 0 and snap["pending_tasks"] > 0:
+        inactivity_score += 35
+    decisions.append(("inactivity", inactivity_score, "streak protection"))
+
+    decisions = sorted(decisions, key=lambda x: x[1], reverse=True)
+    for kind, score, reason in decisions:
+        ok, gate = telegram_should_send(user_id, kind)
+        if ok and score >= 50:
+            msg = telegram_build_smart_message(user_id, kind)
+            return {"decision": "send", "kind": kind, "score": score, "reason": reason, "message": msg}
+        else:
+            telegram_log_decision(user_id, kind, "skip", gate, score, "", False)
+
+    return {"decision": "skip", "kind": "none", "score": 0, "reason": "no eligible smart alert", "message": ""}
+
+@app.get("/api/telegram/intelligence/status/{user_id}")
+def telegram_intelligence_status(user_id: int):
+    ensure_telegram_intelligence_tables()
+    state = telegram_get_intel_state(user_id)
+    snap = telegram_user_activity_snapshot(user_id)
+    decision = telegram_smart_decide(user_id)
+    conn = db()
+    recent = rows_to_dicts(conn.execute("""
+    SELECT * FROM telegram_smart_decisions WHERE user_id=? ORDER BY id DESC LIMIT 15
+    """, (user_id,)).fetchall())
+    conn.close()
+    return {
+        "state": state,
+        "snapshot": snap,
+        "next_decision": decision,
+        "recent_decisions": recent
+    }
+
+@app.post("/api/telegram/intelligence/run/{user_id}")
+def telegram_intelligence_run(user_id: int):
+    ensure_telegram_intelligence_tables()
+    user = get_user(user_id)
+    if not user.get("telegram_chat_id"):
+        return {"sent": False, "reason": "telegram_not_linked"}
+    decision = telegram_smart_decide(user_id)
+    if decision["decision"] != "send":
+        return {"sent": False, "decision": decision}
+    result = telegram_send_user(user_id, decision["message"], "smart_" + decision["kind"])
+    if result.get("sent"):
+        field_map = {
+            "daily": "last_smart_daily_at",
+            "job": "last_smart_job_at",
+            "upgrade": "last_smart_upgrade_at",
+            "inactivity": "last_smart_inactivity_at",
+        }
+        telegram_set_intel_state(user_id, field_map.get(decision["kind"], "last_any_smart_alert_at"))
+    telegram_log_decision(user_id, decision["kind"], "send", decision["reason"], decision["score"], decision["message"], bool(result.get("sent")))
+    return {"sent": bool(result.get("sent")), "decision": decision, "telegram": result}
+
+@app.post("/api/telegram/intelligence/run-all")
+def telegram_intelligence_run_all(admin_key: str = Form("")):
+    expected = os.getenv("ZERO2EARN_ADMIN_KEY", "")
+    if expected and admin_key != expected:
+        raise HTTPException(status_code=403, detail="Invalid admin key")
+    ensure_telegram_intelligence_tables()
+    conn = db()
+    users = rows_to_dicts(conn.execute("""
+    SELECT id FROM users WHERE telegram_chat_id!='' AND notification_opt_in=1
+    """).fetchall())
+    conn.close()
+    items = []
+    for u in users:
+        try:
+            items.append({"user_id": u["id"], "result": telegram_intelligence_run(u["id"])})
         except Exception as e:
-            print("Telegram scheduler error:", e)
-            time.sleep(60)
+            items.append({"user_id": u["id"], "error": str(e)})
+    return {"count": len(items), "items": items}
 
-
-def start_scheduler():
-    t = threading.Thread(target=telegram_scheduler_loop, daemon=True)
-    t.start()
-
-
-# START AUTOMATION
-start_scheduler()
+@app.post("/api/telegram/intelligence/quiet/{user_id}")
+def telegram_intelligence_quiet(user_id: int, hours: int = Form(24)):
+    ensure_telegram_intelligence_tables()
+    until = (datetime.now() + timedelta(hours=int(hours or 24))).isoformat(timespec="seconds")
+    telegram_get_intel_state(user_id)
+    conn = db()
+    conn.execute("UPDATE telegram_intelligence_state SET quiet_until=? WHERE user_id=?", (until, user_id))
+    conn.commit()
+    conn.close()
+    return {"status": "quiet_enabled", "quiet_until": until}

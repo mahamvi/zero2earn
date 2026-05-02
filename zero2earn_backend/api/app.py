@@ -571,9 +571,11 @@ def calculate_talent_profile(user):
     }
 
 
+from fastapi.responses import FileResponse
+
 @app.get("/")
-def home():
-    return {"app": "Zero2Earn AI", "status": "running", "version": "5.0.0"}
+def serve_frontend():
+    return FileResponse("frontend/app.html")
 
 
 @app.get("/health")

@@ -24,6 +24,9 @@ except Exception:
 load_dotenv()
 
 app = FastAPI(title="Zero2Earn AI SaaS", version="5.0.0")
+@app.get("/api/health")
+def health():
+    return {"status": "ok", "app": "Zero2Earn AI"}
 
 app.add_middleware(
     CORSMiddleware,

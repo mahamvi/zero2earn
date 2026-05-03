@@ -399,6 +399,48 @@ main{min-height:calc(100vh - 40px)!important}
 .z2e-intel-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px;margin:14px 0}
 .z2e-intel-box{background:#02061799;border:1px solid #334155;border-radius:18px;padding:14px}
 
+
+
+/* ===== Z2E MOBILE APP UPGRADE — NO FEATURE LOSS ===== */
+:root{--mobile-nav-h:74px;--mobile-safe-bottom:env(safe-area-inset-bottom,0px)}
+.z2e-mobile-bottom-nav,.z2e-mobile-more-sheet,.z2e-mobile-more-backdrop{display:none}
+@media(max-width:950px){
+  html{scroll-behavior:smooth}
+  body{padding-bottom:calc(var(--mobile-nav-h) + var(--mobile-safe-bottom) + 10px);overflow-x:hidden;background:#06101f!important}
+  .app{display:block!important;min-height:100vh!important}
+  .side{
+    display:none!important;
+  }
+  .main{padding:16px 14px calc(var(--mobile-nav-h) + 22px)!important;width:100%!important;max-width:100%!important}
+  .top{position:sticky;top:0;z-index:700;background:linear-gradient(180deg,#06101f 0%,rgba(6,16,31,.94) 86%,rgba(6,16,31,0));padding:12px 0 14px;margin-bottom:12px!important;backdrop-filter:blur(14px)}
+  .top h2{font-size:25px!important;line-height:1.05;margin:0!important}
+  .top p{font-size:13px!important;margin:4px 0 0!important}
+  .user{width:100%;min-width:0!important;margin-top:10px;padding:12px 14px!important;border-radius:18px!important}
+  .hero,.mission-hero-final{border-radius:26px!important;padding:22px!important;margin-bottom:16px!important;box-shadow:0 18px 50px #0008!important}
+  .hero h1{font-size:34px!important}.hero p{font-size:15px!important}
+  .mission-money{font-size:52px!important;letter-spacing:-.04em!important}
+  .mission-next{font-size:21px!important}
+  .panel,.card,.metric{border-radius:20px!important;padding:17px!important;margin-bottom:14px!important}
+  .jobs{grid-template-columns:1fr!important;gap:14px!important}
+  .grid,.grid2,.grid3,.grid4,.focus-grid,.mini-steps,.progress-path{grid-template-columns:1fr!important;gap:12px!important}
+  button,a.btn{min-height:44px;border-radius:14px!important}
+  input,textarea,select{font-size:16px!important;border-radius:14px!important}
+  .z2e-mobile-bottom-nav{
+    position:fixed;left:10px;right:10px;bottom:calc(8px + var(--mobile-safe-bottom));height:64px;display:grid!important;grid-template-columns:repeat(5,1fr);gap:6px;z-index:99999;
+    background:linear-gradient(135deg,rgba(15,23,42,.96),rgba(2,6,23,.98));border:1px solid #334155;border-radius:24px;padding:7px;box-shadow:0 18px 50px #000b,0 0 32px #2563eb22;backdrop-filter:blur(18px)
+  }
+  .z2e-mobile-bottom-nav button{margin:0!important;padding:6px 3px!important;min-height:48px!important;border:0!important;border-radius:17px!important;background:transparent!important;color:#9fb0c8!important;font-size:11px!important;text-align:center!important;font-weight:800!important;line-height:1.15;display:flex!important;flex-direction:column;align-items:center;justify-content:center;gap:2px;transform:none!important;opacity:1!important}
+  .z2e-mobile-bottom-nav button span{font-size:18px;line-height:1}
+  .z2e-mobile-bottom-nav button.active{background:linear-gradient(135deg,#16a34a,#2563eb)!important;color:white!important;box-shadow:0 8px 22px #2563eb44!important}
+  .z2e-mobile-more-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.56);z-index:99990;backdrop-filter:blur(6px)}
+  .z2e-mobile-more-backdrop.open{display:block!important}
+  .z2e-mobile-more-sheet{position:fixed;left:10px;right:10px;bottom:calc(82px + var(--mobile-safe-bottom));z-index:99998;max-height:68vh;overflow:auto;background:linear-gradient(180deg,#0f172a,#020617);border:1px solid #334155;border-radius:28px;padding:16px;box-shadow:0 22px 70px #000d}
+  .z2e-mobile-more-sheet.open{display:block!important;animation:z2eSheetUp .18s ease-out}
+  @keyframes z2eSheetUp{from{transform:translateY(18px);opacity:.4}to{transform:translateY(0);opacity:1}}
+  .z2e-mobile-more-title{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}.z2e-mobile-more-title b{font-size:18px}.z2e-mobile-more-title button{background:#1e293b!important;margin:0!important;padding:8px 12px!important;min-height:36px!important}
+  .z2e-mobile-more-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.z2e-mobile-more-grid button{margin:0!important;width:100%;text-align:left!important;background:#111c34!important;border:1px solid #334155!important;font-size:13px!important;min-height:48px!important}
+  .z2e-upgrade-sticky{bottom:calc(88px + var(--mobile-safe-bottom))!important;right:14px!important}
+}
 </style>
 </head>
 <body>
@@ -2599,9 +2641,9 @@ document.addEventListener("DOMContentLoaded", function(){
 
 
 <script id="z2eNonInvasiveApiDebug">
-window.addEventListener("error", function(e){
-  console.error("Zero2Earn frontend error:", e.message, e.filename, e.lineno);
-});
+    window.addEventListener("error", function (e) {
+        console.error("Zero2Earn frontend error:", e.message, e.filename, e.lineno);
+    });
 </script>
 
 
@@ -2851,5 +2893,73 @@ function z2eWrapTelegramIntelPages(){
 document.addEventListener("DOMContentLoaded",function(){setTimeout(z2eWrapTelegramIntelPages,700);});
 </script>
 
+
+
+<!-- ===== Z2E MOBILE APP NAV — ADDED, NO FEATURE REMOVAL ===== -->
+<div id="z2eMobileBackdrop" class="z2e-mobile-more-backdrop" onclick="z2eCloseMobileMore()"></div>
+<div id="z2eMobileMore" class="z2e-mobile-more-sheet">
+  <div class="z2e-mobile-more-title"><b>Zero2Earn Engines</b><button onclick="z2eCloseMobileMore()">Close</button></div>
+  <div class="z2e-mobile-more-grid">
+    <button onclick="z2eMobileGo('first100')">🚀 First ₹100</button>
+    <button onclick="z2eMobileGo('daily500')">💰 Daily ₹500</button>
+    <button onclick="z2eMobileGo('resume')">📄 Resume</button>
+    <button onclick="z2eMobileGo('jobs')">💼 Jobs</button>
+    <button onclick="z2eMobileGo('apply')">🚀 Apply</button>
+    <button onclick="z2eMobileGo('wingman')">🧠 Wingman</button>
+    <button onclick="z2eMobileGo('micro')">⚡ Micro</button>
+    <button onclick="z2eMobileGo('automation')">🤖 Automation</button>
+    <button onclick="z2eMobileGo('tracker')">📊 Tracker</button>
+    <button onclick="z2eMobileGo('earning')">💰 Income</button>
+    <button onclick="z2eMobileGo('skills')">🎓 Skills</button>
+    <button onclick="z2eMobileGo('booster')">🚀 Booster</button>
+    <button onclick="z2eMobileGo('talent')">👥 Talent</button>
+    <button onclick="z2eMobileGo('recruiter')">🏢 Recruiter</button>
+    <button onclick="z2eMobileGo('plans')">💎 Plans</button>
+  </div>
+</div>
+<nav class="z2e-mobile-bottom-nav" aria-label="Zero2Earn mobile navigation">
+  <button data-z2e-mobile="home" onclick="z2eMobileGo('home')"><span>🏠</span>Home</button>
+  <button data-z2e-mobile="jobs" onclick="z2eMobileGo('jobs')"><span>💼</span>Jobs</button>
+  <button data-z2e-mobile="micro" onclick="z2eMobileGo('micro')"><span>⚡</span>Earn</button>
+  <button data-z2e-mobile="tracker" onclick="z2eMobileGo('tracker')"><span>📊</span>Track</button>
+  <button data-z2e-mobile="more" onclick="z2eOpenMobileMore()"><span>☰</span>More</button>
+</nav>
+<script>
+(function(){
+  const oldShowPage = window.showPage;
+  window.showPage = function(id){
+    if(typeof oldShowPage === 'function') oldShowPage(id);
+    z2eSetMobileActive(id);
+    if(window.innerWidth <= 950){
+      setTimeout(function(){
+        const main = document.querySelector('.main');
+        if(main) main.scrollIntoView({behavior:'smooth', block:'start'});
+        window.scrollTo({top:0, behavior:'smooth'});
+      }, 120);
+    }
+  };
+})();
+function z2eSetMobileActive(id){
+  document.querySelectorAll('.z2e-mobile-bottom-nav button').forEach(function(btn){btn.classList.remove('active')});
+  const direct = document.querySelector('.z2e-mobile-bottom-nav button[data-z2e-mobile="'+id+'"]');
+  const more = document.querySelector('.z2e-mobile-bottom-nav button[data-z2e-mobile="more"]');
+  if(direct) direct.classList.add('active');
+  else if(more) more.classList.add('active');
+}
+function z2eMobileGo(id){
+  z2eCloseMobileMore();
+  if(typeof window.showPage === 'function') window.showPage(id);
+}
+function z2eOpenMobileMore(){
+  document.getElementById('z2eMobileMore')?.classList.add('open');
+  document.getElementById('z2eMobileBackdrop')?.classList.add('open');
+  z2eSetMobileActive('more');
+}
+function z2eCloseMobileMore(){
+  document.getElementById('z2eMobileMore')?.classList.remove('open');
+  document.getElementById('z2eMobileBackdrop')?.classList.remove('open');
+}
+document.addEventListener('DOMContentLoaded', function(){z2eSetMobileActive('home')});
+</script>
 </body>
 </html>
